@@ -230,6 +230,7 @@ Status colours must be distinguishable by more than hue: every status chip also 
 ## 9. Conventions
 
 - TypeScript, functional components only, hooks throughout
+- Never hardcode colours (no hex codes like `#14213D` in screens or components) — define every colour once in `Colors` in `src/constants/theme.ts` and read it through `useTheme()` from `@/hooks/use-theme`, so all screens share it and dark mode works
 - Screens live in `features/<name>/` as `<Name>Screen.tsx`, one per file; route files in `src/app/` follow Expo Router naming (`index.tsx`, `_layout.tsx`) and just render the screen
 - Every file in `src/app/` must default-export a component — no empty route files
 - Hooks return `{ data, loading, error, ...actions }`
