@@ -7,7 +7,7 @@ Module leader: Dr. Amira Abdelaziz. Team SE A3 — Nany Tamer (246755), Zeinab M
 
 Read this before writing code. It covers what the app is, the rules it must obey, and how it is structured.
 
-**Visual design is NOT in this file.** The screens live in a Figma file that the team will share in chat — treat that as the single source of truth for layout, spacing, typography and component styling.
+**The Figma screens are a loose reference, not a spec.** Use them for ideas on layout and flow; it is fine — encouraged — to differ from them and add features that make the app better. **Colours come from §7 of this file, not from Figma.**
 
 ---
 
@@ -125,7 +125,7 @@ src/
 ├── components/          # reusable presentational pieces
 ├── hooks/               # generic UI hooks (theme, color scheme) — not viewmodels
 ├── data/                # seed / static data
-└── constants/theme.ts   # design tokens — generate these FROM the Figma file
+└── constants/theme.ts   # design tokens — built on the brand colours in §7
 ```
 
 **The one rule: a screen never imports from `services/`.**
@@ -205,14 +205,14 @@ Rest timer state · last selected branch · cached equipment list for instant fi
 
 ## 7. Brand colours
 
-Two confirmed brand colours:
+Two confirmed brand colours — **these override the Figma file** (Figma uses a crimson red; do not copy it):
 
 ```
 Midnight  #14213D
 Marigold  #FCA311
 ```
 
-**Everything else — neutrals, surfaces, status colours, type scale, spacing — comes from the Figma file.** Replace the Expo starter values in `src/constants/theme.ts` with tokens from it; do not invent values here. The splash colour in `app.json` is still Expo's default and should change too.
+Build the palette around these two: derive neutrals, surfaces, status colours, type scale and spacing to fit them, in light and dark mode, and replace the Expo starter values in `src/constants/theme.ts`. The splash colour in `app.json` is still Expo's default and should change too.
 
 Status colours must be distinguishable by more than hue: every status chip also carries its word (Available / Soon / Occupied / Maintenance). That is an accessibility requirement, not a style preference.
 
@@ -220,7 +220,7 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 ## 8. Build order for Member 3
 
-1. **Shared foundation first** — `types/` (models + enums), `services/firebase.ts`, navigation shell (`src/app/_layout.tsx` + member tabs), theme tokens from Figma, seed data for one branch in `data/`. Coordinate so this isn't built three times.
+1. **Shared foundation first** — `types/` (models + enums), `services/firebase.ts`, navigation shell (`src/app/_layout.tsx` + member tabs), theme tokens from §7, seed data for one branch in `data/`. Coordinate so this isn't built three times.
 2. **Rest Timer (7)** — fully self-contained. No Firestore, no dependency on anyone else's work. Start here.
 3. **Member Profile (8)** — needs auth and the `users` collection.
 4. **Admin Equipment Management (9)** — needs `branches/{id}/equipment`; overlaps with Member 1's equipment screens, so agree the shape of `equipment` documents with them before writing.
@@ -246,4 +246,4 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 **Not started:** any feature screen, Firebase setup, models, theme tokens.
 
-The team will share the Figma link in chat. Ask for it before building any screen.
+Figma reference: https://www.figma.com/design/bWvey1tCsTVWvBmVHCKI4C/Gym-Connect-%E2%80%94-Mobile-Screens — frames 09 (Rest timer), 16 (My profile) and 17–20 (Admin) are Andro's screens. Treat them as inspiration only (see top of file).
