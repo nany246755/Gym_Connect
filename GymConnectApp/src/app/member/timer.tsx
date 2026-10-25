@@ -112,13 +112,8 @@ export default function RestTimerScreen() {
                   accessibilityState={{ selected }}
                   accessibilityLabel={`${sec} seconds rest`}
                   onPress={() => selectPreset(sec)}
-                  style={[
-                    styles.chip,
-                    selected
-                      ? { backgroundColor: theme.primary, borderColor: theme.primary }
-                      : { backgroundColor: theme.backgroundElement, borderColor: theme.border },
-                  ]}>
-                  <ThemedText type="smallBold" style={{ color: selected ? theme.onPrimary : theme.text }}>
+                  style={[styles.chip, { backgroundColor: selected ? theme.accent : theme.accentSoft }]}>
+                  <ThemedText type="smallBold" style={{ color: selected ? theme.onAccent : theme.accentText }}>
                     {sec}s
                   </ThemedText>
                 </Pressable>
@@ -192,8 +187,7 @@ const styles = StyleSheet.create({
   chip: {
     flex: 1,
     minHeight: 44,
-    borderWidth: 1,
-    borderRadius: Spacing.five,
+    borderRadius: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -17,6 +17,9 @@ export const Colors = {
     primary: '#14213D', // Midnight: filled buttons, selected chips
     onPrimary: '#FFFFFF',
     accent: '#FCA311', // Marigold: highlights and progress, never body text on light surfaces
+    onAccent: '#14213D',
+    accentSoft: '#FFF4DE', // pale Marigold surface (chips)
+    accentText: '#9F5E00', // darkened Marigold: readable (4.5:1) on accentSoft
     border: '#D9DDE5',
   },
   dark: {
@@ -28,6 +31,9 @@ export const Colors = {
     primary: '#FCA311', // Marigold
     onPrimary: '#14213D',
     accent: '#FCA311',
+    onAccent: '#14213D',
+    accentSoft: '#3A2C10',
+    accentText: '#FCA311',
     border: '#2A3B60',
   },
 } as const;
