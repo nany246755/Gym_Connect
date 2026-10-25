@@ -1,6 +1,6 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
+ * The only place colours are defined (see CLAUDE.md §7 and §9). Built on the two brand colours:
+ * Midnight #14213D and Marigold #FCA311. Read them in screens through `useTheme()`.
  */
 
 import '@/global.css';
@@ -9,18 +9,26 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#14213D', // Midnight
+    background: '#F4F5F8',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#E4E7EE',
+    textSecondary: '#5B6475',
+    primary: '#14213D', // Midnight: filled buttons, selected chips
+    onPrimary: '#FFFFFF',
+    accent: '#FCA311', // Marigold: highlights and progress, never body text on light surfaces
+    border: '#D9DDE5',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F2F4F8',
+    background: '#0B1221',
+    backgroundElement: '#14213D', // Midnight
+    backgroundSelected: '#22345A',
+    textSecondary: '#A3ADBF',
+    primary: '#FCA311', // Marigold
+    onPrimary: '#14213D',
+    accent: '#FCA311',
+    border: '#2A3B60',
   },
 } as const;
 

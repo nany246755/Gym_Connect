@@ -81,17 +81,19 @@ When a gated action is attempted without a check-in, show a **"Check-In Required
 
 ## 4. Screens to build — 9 total, 3 per team member
 
-| # | Screen | Covers | Feature folder |
+| # | Screen | Covers | Screen file (code goes here) |
 |---|---|---|---|
-| 1 | Branch Selection & Check-In | FR-1 | `features/branches` |
-| 2 | Equipment Availability | FR-2 | `features/equipment` |
-| 3 | Equipment Details & Alternative Exercises | FR-3 | `features/equipment` |
-| 4 | Spotting Requests | FR-5, FR-6 | `features/spotting` |
-| 5 | Find Workout Partners | FR-7 | `features/partners` |
-| 6 | Messages | FR-8 | `features/messaging` |
-| 7 | Rest Timer | FR-4 | `features/timer` |
-| 8 | Member Profile | FR-9 | `features/profile` |
-| 9 | Admin Equipment Management | FR-10 | `features/admin` |
+| 1 | Branch Selection & Check-In | FR-1 | `src/app/member/branches.tsx` |
+| 2 | Equipment Availability | FR-2 | `src/app/member/equipment/index.tsx` |
+| 3 | Equipment Details & Alternative Exercises | FR-3 | `src/app/member/equipment/[id].tsx` |
+| 4 | Spotting Requests | FR-5, FR-6 | `src/app/member/spotting/index.tsx` |
+| 5 | Find Workout Partners | FR-7 | `src/app/member/partners.tsx` |
+| 6 | Messages | FR-8 | `src/app/member/messages.tsx` |
+| 7 | Rest Timer | FR-4 | `src/app/member/timer.tsx` ✅ built |
+| 8 | Member Profile | FR-9 | `src/app/member/profile.tsx` |
+| 9 | Admin Equipment Management | FR-10 | `src/app/admin/index.tsx` (+ more files in `admin/` for add / edit) |
+
+Paths for screens 1–6 are suggestions — agree them with the team; the rule (screen code in its route file) is not optional.
 
 Sign in and sign up are excluded from the count but still need building.
 
@@ -113,15 +115,15 @@ Documented in the Phase 1 report, so the code must visibly match it. MVVM layers
 
 ```
 src/
-├── app/                 # Expo Router routes ONLY — thin files that render a screen from features/
+├── app/                 # VIEWS — each screen's full code lives in its own route file (see §9)
 │   ├── _layout.tsx      #   root Stack (navigation shell)
-│   ├── member/          #   member routes (tabs)
-│   └── admin/           #   admin-only routes
+│   ├── member/          #   member screens, e.g. member/timer.tsx = Rest Timer
+│   └── admin/           #   admin-only screens
 ├── types/               # MODELS — shapes + enums only, no logic
 ├── services/            # the ONLY layer that touches Firestore or the exercise API
 ├── logic/               # VIEWMODELS — custom hooks, state + actions, no JSX
 ├── context/             # app-wide state (auth, active check-in)
-├── features/<name>/     # VIEWS — one folder per feature: screens + feature-only components
+├── features/<name>/     # helper components used by only one feature's screens — never screens
 ├── components/          # reusable presentational pieces
 ├── hooks/               # generic UI hooks (theme, color scheme) — not viewmodels
 ├── data/                # seed / static data
@@ -231,7 +233,8 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 - TypeScript, functional components only, hooks throughout
 - Never hardcode colours (no hex codes like `#14213D` in screens or components) — define every colour once in `Colors` in `src/constants/theme.ts` and read it through `useTheme()` from `@/hooks/use-theme`, so all screens share it and dark mode works
-- Screens live in `features/<name>/` as `<Name>Screen.tsx`, one per file; route files in `src/app/` follow Expo Router naming (`index.tsx`, `_layout.tsx`) and just render the screen
+- **Each screen's code goes directly in its own route file in `src/app/`** — e.g. the Rest Timer is written in full in `src/app/member/timer.tsx`, not in a separate file that the route re-exports. One screen per file; the default export is named `<Name>Screen` (e.g. `RestTimerScreen`)
+- Pieces a screen uses that are not screens go outside `src/app/` (every file there becomes a route): shared UI in `components/`, one-feature helpers in `features/<name>/`, logic in `logic/`
 - Every file in `src/app/` must default-export a component — no empty route files
 - Hooks return `{ data, loading, error, ...actions }`
 - No inline Firestore queries in components — ever
@@ -245,6 +248,10 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 **Done:** requirements, use case diagram, activity diagrams, architecture decision, data model, screen designs in Figma, Expo project scaffold with the folder structure above (all feature folders still empty; `src/app/index.tsx` is still the Expo starter screen).
 
-**Not started:** any feature screen, Firebase setup, models, theme tokens.
+**Built:** Rest Timer (screen 7), Midnight/Marigold theme tokens.
+
+**Shared check-in hook — use it, don't make another one:** `useCheckIn()` in `src/context/check-in.tsx` returns `{ activeCheckIn }` (type `CheckIn` in `src/types/check-in.ts`). It is a **placeholder** that always says "not checked in". Member 1 fills it in with the real Firestore check-in and adds check-in / check-out there, keeping the name and the `activeCheckIn` field. Screens react to it changing (e.g. the Rest Timer resets to Set 1 when the check-in changes); check-out never calls other screens.
+
+**Not started:** the other feature screens, Firebase setup, the remaining models.
 
 Figma reference: https://www.figma.com/design/bWvey1tCsTVWvBmVHCKI4C/Gym-Connect-%E2%80%94-Mobile-Screens — frames 09 (Rest timer), 16 (My profile) and 17–20 (Admin) are Andro's screens. Treat them as inspiration only (see top of file).

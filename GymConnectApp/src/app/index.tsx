@@ -1,8 +1,10 @@
 import * as Device from 'expo-device';
+import { router } from 'expo-router';
 import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
+import { Button } from '@/components/button';
 import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -54,6 +56,9 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
+
+        {/* shortcut: temporary way into the Rest Timer; remove once the member tab shell exists */}
+        <Button title="Open rest timer" onPress={() => router.push('/member/timer')} style={styles.stepContainer} />
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
