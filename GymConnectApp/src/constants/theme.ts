@@ -7,22 +7,73 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
+
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    // Screen and surface colors
+    text: '#14213D',
+    background: '#F5F6FA',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#EEF1F6',
+    textSecondary: '#64748B',
+
+    // Shared Gym Connect brand colors
+    navy: '#14213D',
+    marigold: '#FCA311',
+
+    // Primary buttons
+    primary: '#FCA311',
+    onPrimary: '#14213D',
+
+    // Check Out button
+    checkOutBackground: '#14213D',
+    checkOutText: '#FFFFFF',
+
+    // Selected branch
+    selectedBorder: '#FCA311',
+
+    // Preferred badge
+    preferredBackground: '#14213D',
+    preferredText: '#FCA311',
+
+    // Status colors
+    success: '#15803D',
+    error: '#B91C1C',
   },
+
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    // Screen and surface colors
+    text: '#FFFFFF',
+    background: '#0B1428',
+    backgroundElement: '#14213D',
+    backgroundSelected: '#233350',
+    textSecondary: '#A8B2C5',
+
+    // Shared Gym Connect brand colors
+    navy: '#14213D',
+    marigold: '#FCA311',
+
+    // Primary buttons
+    primary: '#FCA311',
+    onPrimary: '#14213D',
+
+    // Check Out button
+    checkOutBackground: '#30466C',
+    checkOutText: '#FFFFFF',
+
+    // Selected branch
+    selectedBorder: '#FCA311',
+
+    // Preferred badge
+    preferredBackground: '#FCA311',
+    preferredText: '#14213D',
+
+    // Status colors
+    success: '#4ADE80',
+    error: '#FCA5A5',
   },
 } as const;
+
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 

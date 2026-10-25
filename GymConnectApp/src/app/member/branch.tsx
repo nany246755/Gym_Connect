@@ -1,0 +1,821 @@
+
+import { useEffect, useRef, useState } from 'react';
+
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  AppState,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
+
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+import { Ionicons } from '@expo/vector-icons';
+
+import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/constants/theme';
+
+import { isBranchOpen } from '@/logic/branchAvailability';
+import { useBranch } from '@/context/BranchContext';
+
+import BranchCard from '@/features/branches/BranchCard';
+import { mockBranches } from '@/features/branches/mockBranches';
+
+import type { BranchWithStatus } from '@/types/branch';
+
+export default function BranchScreen() {
+  const colors = useTheme();
+
+  // Get the safe area around the iPhone's status bar.
+  const insets = useSafeAreaInsets();
+
+  const {
+    activeCheckIn,
+    startDemoCheckIn,
+    endDemoCheckIn,
+  } = useBranch();
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // All branches start collapsed
+  const [selectedBranchId, setSelectedBranchId] =
+    useState<string | null>(null);
+
+  // Branch availability
+  const [now, setNow] = useState(() => new Date());
+
+  // Check Out confirmation popup
+  const [
+    isCheckOutModalVisible,
+    setIsCheckOutModalVisible,
+  ] = useState(false);
+
+  const [isCheckingOut, setIsCheckingOut] =
+    useState(false);
+
+  // Temporary success notification
+  const [toastMessage, setToastMessage] =
+    useState<string | null>(null);
+
+  const toastTimer = useRef<
+    ReturnType<typeof setTimeout> | null
+  >(null);
+
+  // Display success notification for 3 seconds
+  const showSuccessToast = (message: string) => {
+    if (toastTimer.current !== null) {
+      clearTimeout(toastTimer.current);
+    }
+
+    setToastMessage(message);
+
+    toastTimer.current = setTimeout(() => {
+      setToastMessage(null);
+      toastTimer.current = null;
+    }, 3000);
+  };
+
+  // Clean up notification timer
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current !== null) {
+        clearTimeout(toastTimer.current);
+      }
+    };
+  }, []);
+
+  // Refresh branch availability
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 30000);
+
+    const subscription = AppState.addEventListener(
+      'change',
+      (state) => {
+        if (state === 'active') {
+          setNow(new Date());
+        }
+      }
+    );
+
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
+  }, []);
+
+  // Calculate Open/Closed status automatically
+  const branchesWithStatus: BranchWithStatus[] =
+    mockBranches.map((branch) => ({
+      ...branch,
+      isOpen: isBranchOpen(
+        branch.openingTime,
+        branch.closingTime,
+        now
+      ),
+    }));
+
+  // Identify the active branch
+  const activeBranch = activeCheckIn
+    ? branchesWithStatus.find(
+        (branch) => branch.id === activeCheckIn.branchId
+      )
+    : null;
+
+  // Search branches
+  const normalizedSearch = searchQuery
+    .trim()
+    .toLowerCase();
+
+  const filteredBranches = branchesWithStatus.filter(
+    (branch) =>
+      branch.name
+        .toLowerCase()
+        .includes(normalizedSearch) ||
+      branch.location
+        .toLowerCase()
+        .includes(normalizedSearch)
+  );
+
+  // Expand or collapse branch cards
+  const handleBranchPress = (branchId: string) => {
+    setSelectedBranchId((currentId) =>
+      currentId === branchId ? null : branchId
+    );
+  };
+
+  // Check In
+  const handleDemoCheckIn = (branchId: string) => {
+    const branch = branchesWithStatus.find(
+      (item) => item.id === branchId
+    );
+
+    if (!branch || !branch.isOpen) {
+      return;
+    }
+
+    if (activeCheckIn !== null) {
+      return;
+    }
+
+    const success = startDemoCheckIn(branchId);
+
+    if (success) {
+      showSuccessToast(
+        `Successfully checked in at ${branch.name}`
+      );
+    }
+  };
+
+  // Open Check Out confirmation
+  const handleRequestCheckOut = () => {
+    if (!activeCheckIn || isCheckingOut) {
+      return;
+    }
+
+    setIsCheckingOut(false);
+    setIsCheckOutModalVisible(true);
+  };
+
+  // Cancel Check Out
+  const handleCancelCheckOut = () => {
+    if (isCheckingOut) {
+      return;
+    }
+
+    setIsCheckOutModalVisible(false);
+  };
+
+  // Confirm Check Out
+  const handleConfirmCheckOut = async () => {
+    if (!activeCheckIn || isCheckingOut) {
+      return;
+    }
+
+    const branchName =
+      activeBranch?.name ?? 'your branch';
+
+    // Show loading state
+    setIsCheckingOut(true);
+
+    // Demo processing delay
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    // End local demo attendance
+    endDemoCheckIn();
+
+    // Close popup
+    setIsCheckOutModalVisible(false);
+    setIsCheckingOut(false);
+
+    // Show success notification
+    showSuccessToast(
+      `Successfully checked out of ${branchName}`
+    );
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: colors.background },
+      ]}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Image
+            source={require(
+              '../../../assets/images/logo(notext).jpeg'
+            )}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <View style={styles.headerText}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text },
+              ]}
+            >
+              Gym Connect
+            </Text>
+
+            <Text
+              style={[
+                styles.subtitle,
+                { color: colors.textSecondary },
+              ]}
+            >
+              Find your gym branch
+            </Text>
+          </View>
+
+          {/* Profile icon */}
+          <View
+            style={[
+              styles.profileIcon,
+              {
+                backgroundColor:
+                  colors.backgroundElement,
+              },
+            ]}
+          >
+            <Ionicons
+              name="person-outline"
+              size={24}
+              color={colors.text}
+            />
+          </View>
+        </View>
+
+        {/* Search Bar */}
+        <View
+          style={[
+            styles.searchContainer,
+            {
+              backgroundColor:
+                colors.backgroundSelected,
+            },
+          ]}
+        >
+          <Ionicons
+            name="search-outline"
+            size={22}
+            color={colors.textSecondary}
+          />
+
+          <TextInput
+            style={[
+              styles.searchInput,
+              { color: colors.text },
+            ]}
+            placeholder="Search branches..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+
+          {searchQuery.length > 0 && (
+            <Pressable
+              onPress={clearSearch}
+              accessibilityRole="button"
+              accessibilityLabel="Clear branch search"
+              hitSlop={10}
+            >
+              <Ionicons
+                name="close-circle"
+                size={22}
+                color={colors.textSecondary}
+              />
+            </Pressable>
+          )}
+        </View>
+
+        {/* Available Branches */}
+        <View style={styles.branchSection}>
+          <View style={styles.sectionHeader}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: colors.text },
+              ]}
+            >
+              Available Branches
+            </Text>
+
+            <Text
+              style={[
+                styles.branchCount,
+                { color: colors.textSecondary },
+              ]}
+            >
+              {filteredBranches.length}{' '}
+              {filteredBranches.length === 1
+                ? 'branch'
+                : 'branches'}
+            </Text>
+          </View>
+
+          {/* Branch Cards */}
+          {filteredBranches.length > 0 ? (
+            filteredBranches.map((branch) => (
+              <BranchCard
+                key={branch.id}
+                branch={branch}
+                isSelected={
+                  selectedBranchId === branch.id
+                }
+                onPress={() =>
+                  handleBranchPress(branch.id)
+                }
+                onCheckIn={handleDemoCheckIn}
+                onCheckOut={handleRequestCheckOut}
+                activeCheckInBranchId={
+                  activeCheckIn?.branchId ?? null
+                }
+                checkedInAt={
+                  activeCheckIn?.branchId === branch.id
+                    ? activeCheckIn.checkedInAt
+                    : null
+                }
+              />
+            ))
+          ) : (
+            <View
+              style={[
+                styles.emptyState,
+                {
+                  backgroundColor:
+                    colors.backgroundElement,
+                },
+              ]}
+            >
+              <Ionicons
+                name="search-outline"
+                size={32}
+                color={colors.textSecondary}
+              />
+
+              <Text
+                style={[
+                  styles.emptyTitle,
+                  { color: colors.text },
+                ]}
+              >
+                No matching branches
+              </Text>
+
+              <Text
+                style={[
+                  styles.emptyDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                Try searching for another branch
+                name or location.
+              </Text>
+
+              <Pressable
+                onPress={clearSearch}
+                accessibilityRole="button"
+              >
+                <Text
+                  style={[
+                    styles.clearText,
+                    { color: colors.marigold },
+                  ]}
+                >
+                  Clear search
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Floating Success Notification */}
+      {/* FIXED: Positioned below the phone's status bar */}
+      {toastMessage !== null && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.toastPosition,
+            {
+              top: insets.top + 16,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.toastBox,
+              {
+                backgroundColor:
+                  colors.backgroundElement,
+                borderColor: colors.success,
+              },
+            ]}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={24}
+              color={colors.success}
+            />
+
+            <Text
+              style={[
+                styles.toastText,
+                { color: colors.text },
+              ]}
+            >
+              {toastMessage}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Check Out Confirmation Modal */}
+      <Modal
+        visible={isCheckOutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCancelCheckOut}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalCard,
+              {
+                backgroundColor:
+                  colors.backgroundElement,
+              },
+            ]}
+          >
+            {/* Icon */}
+            <View
+              style={[
+                styles.modalIcon,
+                {
+                  backgroundColor:
+                    colors.backgroundSelected,
+                },
+              ]}
+            >
+              <Ionicons
+                name="log-out-outline"
+                size={28}
+                color={colors.marigold}
+              />
+            </View>
+
+            {/* Title */}
+            <Text
+              style={[
+                styles.modalTitle,
+                { color: colors.text },
+              ]}
+            >
+              Confirm Check Out
+            </Text>
+
+            {/* Description */}
+            <Text
+              style={[
+                styles.modalDescription,
+                { color: colors.textSecondary },
+              ]}
+            >
+              {isCheckingOut
+                ? 'Processing your check-out...'
+                : `Are you sure you want to check out of ${
+                    activeBranch?.name ??
+                    'your current branch'
+                  }?`}
+            </Text>
+
+            {/* Action buttons */}
+            <View style={styles.modalActions}>
+              {!isCheckingOut && (
+                <Pressable
+                  onPress={handleCancelCheckOut}
+                  style={[
+                    styles.modalButton,
+                    {
+                      backgroundColor:
+                        colors.backgroundSelected,
+                    },
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Text
+                    style={[
+                      styles.modalButtonText,
+                      { color: colors.text },
+                    ]}
+                  >
+                    Cancel
+                  </Text>
+                </Pressable>
+              )}
+
+              <Pressable
+                onPress={handleConfirmCheckOut}
+                disabled={isCheckingOut}
+                style={[
+                  styles.modalButton,
+                  {
+                    backgroundColor: isCheckingOut
+                      ? colors.checkOutBackground
+                      : colors.marigold,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityState={{
+                  disabled: isCheckingOut,
+                  busy: isCheckingOut,
+                }}
+              >
+                {isCheckingOut ? (
+                  <View style={styles.loadingContent}>
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.checkOutText}
+                    />
+
+                    <Text
+                      style={[
+                        styles.modalButtonText,
+                        {
+                          color: colors.checkOutText,
+                        },
+                      ]}
+                    >
+                      Checking Out...
+                    </Text>
+                  </View>
+                ) : (
+                  <Text
+                    style={[
+                      styles.modalButtonText,
+                      { color: colors.onPrimary },
+                    ]}
+                  >
+                    Check Out
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.five,
+  },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.four,
+    gap: Spacing.two,
+  },
+
+  logo: {
+    width: 65,
+    height: 50,
+  },
+
+  headerText: {
+    flex: 1,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+
+  subtitle: {
+    fontSize: 12,
+    marginTop: Spacing.one,
+  },
+
+  profileIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+    height: 52,
+    gap: Spacing.two,
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    height: '100%',
+    paddingVertical: 0,
+  },
+
+  branchSection: {
+    marginTop: Spacing.four,
+    gap: Spacing.three,
+  },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  branchCount: {
+    fontSize: 12,
+  },
+
+  emptyState: {
+    borderRadius: 20,
+    padding: Spacing.four,
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  emptyDescription: {
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
+  clearText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: Spacing.two,
+  },
+
+  // Floating toast notification
+  toastPosition: {
+    position: 'absolute',
+
+    // The top position is calculated using
+    // useSafeAreaInsets() in the JSX above.
+
+    left: Spacing.four,
+    right: Spacing.four,
+    zIndex: 20,
+    elevation: 20,
+  },
+
+  toastBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.three,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: Spacing.two,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  toastText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 19,
+  },
+
+  // Check Out confirmation popup
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    justifyContent: 'center',
+    padding: Spacing.four,
+  },
+
+  modalCard: {
+    borderRadius: 22,
+    padding: Spacing.four,
+    alignItems: 'center',
+    gap: Spacing.three,
+  },
+
+  modalIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  modalDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  modalActions: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+
+  modalButton: {
+    flex: 1,
+    height: 50,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  loadingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+  },
+});
