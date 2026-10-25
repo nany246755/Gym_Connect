@@ -7,56 +7,73 @@ import '@/global.css';
 
 import { Platform, type TextStyle } from 'react-native';
 
+
 export const Colors = {
   light: {
-    text: '#14213D', // Midnight
-    background: '#F4F5F8',
+    // Screen and surface colors
+    text: '#14213D',
+    background: '#F5F6FA',
     backgroundElement: '#FFFFFF',
-    backgroundSelected: '#E4E7EE',
-    textSecondary: '#5B6475',
-    primary: '#14213D', // Midnight: filled buttons, selected chips
-    onPrimary: '#FFFFFF',
-    accent: '#FCA311', // Marigold: highlights and progress, never body text on light surfaces
-    onAccent: '#14213D',
-    accentSoft: '#FFF4DE', // pale Marigold surface (chips)
-    accentText: '#9F5E00', // darkened Marigold: readable (4.5:1) on accentSoft
-    border: '#D9DDE5',
-    danger: '#B42318', // validation errors
-    success: '#1E7F4F', // "Open" and other positive states
-    successSoft: '#E3F4EA', // tinted chip behind success text
-    dangerSoft: '#FBE5E3', // tinted chip behind danger text
-    onDanger: '#FFFFFF',
-    hero: '#14213D', // Midnight header band (same in both modes)
-    heroText: '#FFFFFF',
-    heroSubtext: '#A3ADBF',
-    heroChip: '#22345A',
-    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
-  },
-  dark: {
-    text: '#F2F4F8',
-    background: '#0B1221',
-    backgroundElement: '#14213D', // Midnight
-    backgroundSelected: '#22345A',
-    textSecondary: '#A3ADBF',
-    primary: '#FCA311', // Marigold
+    backgroundSelected: '#EEF1F6',
+    textSecondary: '#64748B',
+
+    // Shared Gym Connect brand colors
+    navy: '#14213D',
+    marigold: '#FCA311',
+
+    // Primary buttons
+    primary: '#FCA311',
     onPrimary: '#14213D',
-    accent: '#FCA311',
-    onAccent: '#14213D',
-    accentSoft: '#3A2C10',
-    accentText: '#FCA311',
-    border: '#2A3B60',
-    danger: '#FF8A80',
-    success: '#4CC38A',
-    successSoft: '#123527',
-    dangerSoft: '#3D1A1A',
-    onDanger: '#14213D',
-    hero: '#14213D',
-    heroText: '#FFFFFF',
-    heroSubtext: '#A3ADBF',
-    heroChip: '#22345A',
-    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
+
+    // Check Out button
+    checkOutBackground: '#14213D',
+    checkOutText: '#FFFFFF',
+
+    // Selected branch
+    selectedBorder: '#FCA311',
+
+    // Preferred badge
+    preferredBackground: '#14213D',
+    preferredText: '#FCA311',
+
+    // Status colors
+    success: '#15803D',
+    error: '#B91C1C',
+  },
+
+  dark: {
+    // Screen and surface colors
+    text: '#FFFFFF',
+    background: '#0B1428',
+    backgroundElement: '#14213D',
+    backgroundSelected: '#233350',
+    textSecondary: '#A8B2C5',
+
+    // Shared Gym Connect brand colors
+    navy: '#14213D',
+    marigold: '#FCA311',
+
+    // Primary buttons
+    primary: '#FCA311',
+    onPrimary: '#14213D',
+
+    // Check Out button
+    checkOutBackground: '#30466C',
+    checkOutText: '#FFFFFF',
+
+    // Selected branch
+    selectedBorder: '#FCA311',
+
+    // Preferred badge
+    preferredBackground: '#FCA311',
+    preferredText: '#14213D',
+
+    // Status colors
+    success: '#4ADE80',
+    error: '#FCA5A5',
   },
 } as const;
+
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 

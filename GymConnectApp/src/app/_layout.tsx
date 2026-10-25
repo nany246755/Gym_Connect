@@ -6,6 +6,8 @@ import {
   ThemeProvider,
 } from 'expo-router';
 
+import { useColorScheme } from 'react-native';
+import { BranchProvider } from '@/context/BranchContext';
 import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -21,8 +23,12 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme} >
-      <Stack screenOptions={{ headerShown: false }} />
+    <ThemeProvider
+      value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+    >
+      <BranchProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </BranchProvider>
     </ThemeProvider>
   );
 }

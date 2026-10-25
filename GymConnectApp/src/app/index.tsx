@@ -1,3 +1,9 @@
+
+import { Redirect } from 'expo-router';
+
+export default function Index() {
+  return <Redirect href="/member/branch" />;
+}
 import { router, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';

@@ -1,10 +1,21 @@
-// branches/{branchId} — see CLAUDE.md §6.
+
+import type { ImageSourcePropType } from 'react-native';
+
 export type Branch = {
   id: string;
   name: string;
-  address: string;
-  zones: string[];
-  opensAt: string; // "HH:mm"
-  closesAt: string; // "HH:mm"
-  memberCount: number;
+  location: string;
+
+  operatingHours: string;
+  openingTime: string;
+  closingTime: string;
+
+  checkedInCount: number;
+  isPreferred: boolean;
+  image?: ImageSourcePropType;
+};
+
+// Includes the calculated availability status.
+export type BranchWithStatus = Branch & {
+  isOpen: boolean;
 };
