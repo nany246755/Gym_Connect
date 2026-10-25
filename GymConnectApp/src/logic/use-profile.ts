@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { applyAppearance } from '@/logic/appearance';
 import { toggleInOrder, validateProfile } from '@/logic/profile';
 import { loadAppearance, saveAppearance } from '@/services/appearance-storage';
-import { getBranches, getProfile, saveProfile } from '@/services/profile-service';
+import { getBranches } from '@/services/branch-service';
+import { getProfile, saveProfile } from '@/services/profile-service';
 import type { Branch } from '@/types/branch';
 import type { AppearanceMode } from '@/types/settings';
 import {

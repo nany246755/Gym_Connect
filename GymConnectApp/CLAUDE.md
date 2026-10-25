@@ -174,6 +174,8 @@ exercises/{exerciseId}
   name, muscleGroup (enum), equipmentType, externalRef?
 ```
 
+**Equipment additions (agree with Member 1):** the admin screens add `station` (e.g. "Rack 02") and optional `imageUrl` to equipment documents — see `src/types/equipment.ts`. `muscleGroup` stays a single value (needed by FR-3), even though the Figma frame says "select all that apply".
+
 ### Enums
 
 - `EquipmentStatus`: `Available` · `AvailableSoon` · `Occupied` · `Maintenance`
@@ -248,7 +250,9 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 **Done:** requirements, use case diagram, activity diagrams, architecture decision, data model, screen designs in Figma, Expo project scaffold with the folder structure above (all feature folders still empty; `src/app/index.tsx` is still the Expo starter screen).
 
-**Built:** Rest Timer (screen 7), Member Profile (screen 8, mock data), Midnight/Marigold theme tokens, shared `Button`, `Chip`, `SegmentedControl` and `BottomSheet` in `components/` — reuse them instead of making new ones.
+**Built:** Rest Timer (screen 7), Member Profile (screen 8, mock data), Admin Equipment Management (screen 9: `src/app/admin/index.tsx` inventory + `src/app/admin/edit.tsx` add/edit, mock data in `src/data/mock-equipment.ts`), Midnight/Marigold theme tokens, shared `Button`, `Chip`, `SegmentedControl` and `BottomSheet` in `components/` — reuse them instead of making new ones.
+
+**Running your screens:** `src/app/index.tsx` is a temporary **launcher** (the Expo starter page and its images were removed). Add one line to its `SCREENS` list to reach your screen; replace the file with the real Home / tab shell when the team builds it. App icon and splash image are not set yet (the Expo ones were deleted) — add Gym Connect assets to `assets/images/` and `app.json` when ready.
 
 **UI phase — no database yet:** screens read mock data from `src/data/` (`mock-user.ts`, `mock-branches.ts`) through a service, and edits are saved on the device (AsyncStorage). When Firebase is added, only the service bodies change (e.g. `services/profile-service.ts`), never the screens. Reuse `mock-branches.ts` instead of making new branch lists.
 

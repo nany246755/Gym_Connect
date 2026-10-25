@@ -2,11 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { mockBranches } from '@/data/mock-branches';
 import { mockUser } from '@/data/mock-user';
-import type { Branch } from '@/types/branch';
 import type { User } from '@/types/user';
 
 // shortcut: mock data + edits saved on this device, because there is no database in the UI phase.
-// When Firebase is added, replace these bodies with Firestore (`users`, `branches`); screens don't change.
+// When Firebase is added, replace these bodies with Firestore (`users`); screens don't change.
 const KEY = 'profile';
 
 export async function getProfile(): Promise<User> {
@@ -18,8 +17,4 @@ export async function getProfile(): Promise<User> {
 
 export async function saveProfile(user: User): Promise<void> {
   await AsyncStorage.setItem(KEY, JSON.stringify(user));
-}
-
-export async function getBranches(): Promise<Branch[]> {
-  return mockBranches;
 }

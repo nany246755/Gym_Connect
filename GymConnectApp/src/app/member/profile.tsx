@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { SymbolView } from 'expo-symbols';
 import { useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { Chip } from '@/components/chip';
 import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Icons as ICONS, type IconName } from '@/constants/icons';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { isOpenNow } from '@/logic/branch';
@@ -26,18 +27,6 @@ import { useProfile } from '@/logic/use-profile';
 import type { Branch } from '@/types/branch';
 import { APPEARANCE_MODES } from '@/types/settings';
 import { FITNESS_LEVELS, TRAINING_STYLES, WEEK_DAYS } from '@/types/user';
-
-type IconName = SymbolViewProps['name'];
-const ICONS = {
-  training: { ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' },
-  schedule: { ios: 'calendar', android: 'calendar_month', web: 'calendar_month' },
-  branch: { ios: 'mappin.and.ellipse', android: 'location_on', web: 'location_on' },
-  theme: { ios: 'circle.lefthalf.filled', android: 'contrast', web: 'contrast' },
-  camera: { ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' },
-  clock: { ios: 'clock', android: 'schedule', web: 'schedule' },
-  logout: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout', web: 'logout' },
-  saved: { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' },
-} satisfies Record<string, IconName>;
 
 const AVATAR_SIZE = 88;
 const LAST_SLOT = SCHEDULE_SLOTS[SCHEDULE_SLOTS.length - 1];

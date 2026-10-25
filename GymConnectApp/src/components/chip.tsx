@@ -1,8 +1,9 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from './themed-text';
 
+import { Icons } from '@/constants/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -11,11 +12,12 @@ type ChipProps = Omit<PressableProps, 'style' | 'children'> & {
   selected: boolean;
   multiple?: boolean; // checkbox-style (many can be on) instead of radio-style
   check?: boolean; // show a check mark when selected; defaults to on for multiple
+  dot?: string; // small colour dot before the label, e.g. a status colour
   tone?: 'accent' | 'primary'; // soft Marigold (timer presets) or neutral with Midnight when selected (forms)
   style?: StyleProp<ViewStyle>;
 };
 
-export function Chip({ label, selected, multiple, check = multiple, tone = 'accent', style, ...rest }: ChipProps) {
+export function Chip({ label, selected, multiple, check = multiple, dot, tone = 'accent', style, ...rest }: ChipProps) {
   const theme = useTheme();
   const colors =
     tone === 'accent'
@@ -35,12 +37,13 @@ export function Chip({ label, selected, multiple, check = multiple, tone = 'acce
       {...rest}>
       {check && selected && (
         <SymbolView
-          name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+          name={Icons.check}
           size={14}
           weight="bold"
           tintColor={colors.fg}
         />
       )}
+      {dot && !(check && selected) && <View style={[styles.dot, { backgroundColor: dot }]} />}
       <ThemedText type="smallBold" style={{ color: colors.fg }}>
         {label}
       </ThemedText>
@@ -59,4 +62,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dot: { width: 8, height: 8, borderRadius: 4 },
 });

@@ -5,7 +5,7 @@
 
 import '@/global.css';
 
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export const Colors = {
   light: {
@@ -23,6 +23,9 @@ export const Colors = {
     border: '#D9DDE5',
     danger: '#B42318', // validation errors
     success: '#1E7F4F', // "Open" and other positive states
+    successSoft: '#E3F4EA', // tinted chip behind success text
+    dangerSoft: '#FBE5E3', // tinted chip behind danger text
+    onDanger: '#FFFFFF',
     hero: '#14213D', // Midnight header band (same in both modes)
     heroText: '#FFFFFF',
     heroSubtext: '#A3ADBF',
@@ -44,6 +47,9 @@ export const Colors = {
     border: '#2A3B60',
     danger: '#FF8A80',
     success: '#4CC38A',
+    successSoft: '#123527',
+    dangerSoft: '#3D1A1A',
+    onDanger: '#14213D',
     hero: '#14213D',
     heroText: '#FFFFFF',
     heroSubtext: '#A3ADBF',
@@ -91,3 +97,7 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+// Web only: hides the browser's own focus ring on text inputs (screens show focus with the border
+// instead). RN's types don't list 'none', but react-native-web supports it.
+export const NoWebOutline = (Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as unknown as TextStyle;

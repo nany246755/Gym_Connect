@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 type BottomSheetProps = {
   visible: boolean;
-  title: string;
+  title?: string; // omit when the content has its own heading
   onClose: () => void;
   children: ReactNode;
   scrollRef?: Ref<ComponentRef<typeof ScrollView>>; // lets the caller scroll the list, e.g. to the selected item
@@ -34,9 +34,11 @@ export function BottomSheet({ visible, title, onClose, children, scrollRef }: Bo
             { backgroundColor: theme.backgroundElement, paddingBottom: insets.bottom + Spacing.three },
           ]}>
           <View style={[styles.handle, { backgroundColor: theme.border }]} />
-          <ThemedText type="smallBold" style={styles.title}>
-            {title}
-          </ThemedText>
+          {title && (
+            <ThemedText type="smallBold" style={styles.title}>
+              {title}
+            </ThemedText>
+          )}
           <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
             {children}
           </ScrollView>
