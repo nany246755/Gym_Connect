@@ -21,6 +21,13 @@ export const Colors = {
     accentSoft: '#FFF4DE', // pale Marigold surface (chips)
     accentText: '#9F5E00', // darkened Marigold: readable (4.5:1) on accentSoft
     border: '#D9DDE5',
+    danger: '#B42318', // validation errors
+    success: '#1E7F4F', // "Open" and other positive states
+    hero: '#14213D', // Midnight header band (same in both modes)
+    heroText: '#FFFFFF',
+    heroSubtext: '#A3ADBF',
+    heroChip: '#22345A',
+    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
   },
   dark: {
     text: '#F2F4F8',
@@ -35,6 +42,13 @@ export const Colors = {
     accentSoft: '#3A2C10',
     accentText: '#FCA311',
     border: '#2A3B60',
+    danger: '#FF8A80',
+    success: '#4CC38A',
+    hero: '#14213D',
+    heroText: '#FFFFFF',
+    heroSubtext: '#A3ADBF',
+    heroChip: '#22345A',
+    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
   },
 } as const;
 

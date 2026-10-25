@@ -57,8 +57,9 @@ export default function HomeScreen() {
           />
         </ThemedView>
 
-        {/* shortcut: temporary way into the Rest Timer; remove once the member tab shell exists */}
+        {/* shortcut: temporary way into Andro's screens; remove once the member tab shell exists */}
         <Button title="Open rest timer" onPress={() => router.push('/member/timer')} style={styles.stepContainer} />
+        <Button title="Open my profile" onPress={() => router.push('/member/profile')} style={styles.stepContainer} />
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>

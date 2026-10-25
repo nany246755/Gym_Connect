@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { Chip } from '@/components/chip';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -103,22 +104,16 @@ export default function RestTimerScreen() {
           </View>
 
           <View style={styles.row} accessibilityRole="radiogroup">
-            {PRESETS_SEC.map((sec) => {
-              const selected = data.durationSec === sec;
-              return (
-                <Pressable
-                  key={sec}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={`${sec} seconds rest`}
-                  onPress={() => selectPreset(sec)}
-                  style={[styles.chip, { backgroundColor: selected ? theme.accent : theme.accentSoft }]}>
-                  <ThemedText type="smallBold" style={{ color: selected ? theme.onAccent : theme.accentText }}>
-                    {sec}s
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
+            {PRESETS_SEC.map((sec) => (
+              <Chip
+                key={sec}
+                label={`${sec}s`}
+                selected={data.durationSec === sec}
+                accessibilityLabel={`${sec} seconds rest`}
+                onPress={() => selectPreset(sec)}
+                style={styles.flex}
+              />
+            ))}
           </View>
 
           <View style={styles.row}>
@@ -184,13 +179,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: Spacing.two },
   flex: { flex: 1 },
   mainButton: { flex: 2 },
-  chip: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',

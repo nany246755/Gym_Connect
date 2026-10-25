@@ -248,7 +248,9 @@ Status colours must be distinguishable by more than hue: every status chip also 
 
 **Done:** requirements, use case diagram, activity diagrams, architecture decision, data model, screen designs in Figma, Expo project scaffold with the folder structure above (all feature folders still empty; `src/app/index.tsx` is still the Expo starter screen).
 
-**Built:** Rest Timer (screen 7), Midnight/Marigold theme tokens.
+**Built:** Rest Timer (screen 7), Member Profile (screen 8, mock data), Midnight/Marigold theme tokens, shared `Button`, `Chip`, `SegmentedControl` and `BottomSheet` in `components/` — reuse them instead of making new ones.
+
+**UI phase — no database yet:** screens read mock data from `src/data/` (`mock-user.ts`, `mock-branches.ts`) through a service, and edits are saved on the device (AsyncStorage). When Firebase is added, only the service bodies change (e.g. `services/profile-service.ts`), never the screens. Reuse `mock-branches.ts` instead of making new branch lists.
 
 **Shared check-in hook — use it, don't make another one:** `useCheckIn()` in `src/context/check-in.tsx` returns `{ activeCheckIn }` (type `CheckIn` in `src/types/check-in.ts`). It is a **placeholder** that always says "not checked in". Member 1 fills it in with the real Firestore check-in and adds check-in / check-out there, keeping the name and the `activeCheckIn` field. Screens react to it changing (e.g. the Rest Timer resets to Set 1 when the check-in changes); check-out never calls other screens.
 
