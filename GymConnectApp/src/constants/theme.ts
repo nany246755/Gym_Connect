@@ -1,11 +1,11 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
+ * The only place colours are defined (see CLAUDE.md §7 and §9). Built on the two brand colours:
+ * Midnight #14213D and Marigold #FCA311. Read them in screens through `useTheme()`.
  */
 
 import '@/global.css';
 
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 
 export const Colors = {
@@ -114,3 +114,7 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+// Web only: hides the browser's own focus ring on text inputs (screens show focus with the border
+// instead). RN's types don't list 'none', but react-native-web supports it.
+export const NoWebOutline = (Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as unknown as TextStyle;
