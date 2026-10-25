@@ -1,98 +1,97 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router, type Href } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { SymbolView } from 'expo-symbols';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Icons, type IconName } from '@/constants/icons';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+// shortcut: temporary dev launcher so each team member can open their own screens while the app has
+// no shared navigation yet. Replace this file with the real Home / tab shell once the team builds it.
+// To add your screen: put one line in SCREENS below.
+const SCREENS: { title: string; route: Href; owner: string; icon: IconName }[] = [
+  { title: 'Rest Timer', route: '/member/timer', owner: 'Member 3 · Andro', icon: Icons.clock },
+  { title: 'My Profile', route: '/member/profile', owner: 'Member 3 · Andro', icon: Icons.profile },
+  { title: 'Admin · Equipment', route: '/admin', owner: 'Member 3 · Andro', icon: Icons.equipment },
+];
 
-export default function HomeScreen() {
+export default function DevLauncherScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <StatusBar style="light" />
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.five }}>
+        <View style={[styles.hero, { backgroundColor: theme.hero, paddingTop: insets.top + Spacing.four }]}>
+          <View style={styles.inner}>
+            <ThemedText type="smallBold" style={[styles.brand, { color: theme.accent }]}>
+              GYM CONNECT
+            </ThemedText>
+            <ThemedText type="subtitle" style={{ color: theme.heroText }}>
+              Screens
+            </ThemedText>
+            <ThemedText type="small" style={{ color: theme.heroSubtext }}>
+              Temporary launcher until the app has its real navigation
+            </ThemedText>
+          </View>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
+        <View style={[styles.inner, styles.list]}>
+          {SCREENS.map((s) => (
+            <Pressable
+              key={s.title}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${s.title}`}
+              onPress={() => router.push(s.route)}
+              style={({ pressed }) => [
+                styles.card,
+                { backgroundColor: theme.backgroundElement, borderColor: theme.border, opacity: pressed ? 0.8 : 1 },
+              ]}>
+              <View style={[styles.icon, { backgroundColor: theme.accentSoft }]}>
+                <SymbolView name={s.icon} size={22} tintColor={theme.accent} />
+              </View>
+              <View style={styles.flex}>
+                <ThemedText type="smallBold" style={styles.title}>
+                  {s.title}
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {s.owner}
+                </ThemedText>
+              </View>
+              <SymbolView name={Icons.next} size={16} tintColor={theme.textSecondary} />
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  container: { flex: 1 },
+  flex: { flex: 1 },
+  inner: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center', paddingHorizontal: Spacing.three },
+  hero: {
+    paddingBottom: Spacing.five,
+    borderBottomLeftRadius: Spacing.five,
+    borderBottomRightRadius: Spacing.five,
+  },
+  brand: { letterSpacing: 3, marginBottom: Spacing.two },
+  list: { gap: Spacing.three, marginTop: Spacing.four },
+  card: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    minHeight: 72,
+    padding: Spacing.three,
+    borderWidth: 1,
+    borderRadius: Spacing.three,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  icon: { width: 44, height: 44, borderRadius: Spacing.three, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 17 },
 });

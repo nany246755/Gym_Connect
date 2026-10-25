@@ -1,26 +1,60 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
+ * The only place colours are defined (see CLAUDE.md §7 and §9). Built on the two brand colours:
+ * Midnight #14213D and Marigold #FCA311. Read them in screens through `useTheme()`.
  */
 
 import '@/global.css';
 
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#14213D', // Midnight
+    background: '#F4F5F8',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#E4E7EE',
+    textSecondary: '#5B6475',
+    primary: '#14213D', // Midnight: filled buttons, selected chips
+    onPrimary: '#FFFFFF',
+    accent: '#FCA311', // Marigold: highlights and progress, never body text on light surfaces
+    onAccent: '#14213D',
+    accentSoft: '#FFF4DE', // pale Marigold surface (chips)
+    accentText: '#9F5E00', // darkened Marigold: readable (4.5:1) on accentSoft
+    border: '#D9DDE5',
+    danger: '#B42318', // validation errors
+    success: '#1E7F4F', // "Open" and other positive states
+    successSoft: '#E3F4EA', // tinted chip behind success text
+    dangerSoft: '#FBE5E3', // tinted chip behind danger text
+    onDanger: '#FFFFFF',
+    hero: '#14213D', // Midnight header band (same in both modes)
+    heroText: '#FFFFFF',
+    heroSubtext: '#A3ADBF',
+    heroChip: '#22345A',
+    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F2F4F8',
+    background: '#0B1221',
+    backgroundElement: '#14213D', // Midnight
+    backgroundSelected: '#22345A',
+    textSecondary: '#A3ADBF',
+    primary: '#FCA311', // Marigold
+    onPrimary: '#14213D',
+    accent: '#FCA311',
+    onAccent: '#14213D',
+    accentSoft: '#3A2C10',
+    accentText: '#FCA311',
+    border: '#2A3B60',
+    danger: '#FF8A80',
+    success: '#4CC38A',
+    successSoft: '#123527',
+    dangerSoft: '#3D1A1A',
+    onDanger: '#14213D',
+    hero: '#14213D',
+    heroText: '#FFFFFF',
+    heroSubtext: '#A3ADBF',
+    heroChip: '#22345A',
+    backdrop: 'rgba(0, 0, 0, 0.4)', // dims the screen behind bottom sheets
   },
 } as const;
 
@@ -63,3 +97,7 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+// Web only: hides the browser's own focus ring on text inputs (screens show focus with the border
+// instead). RN's types don't list 'none', but react-native-web supports it.
+export const NoWebOutline = (Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as unknown as TextStyle;
