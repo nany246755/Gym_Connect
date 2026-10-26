@@ -24,7 +24,16 @@ export function useEquipmentInventory() {
         setBranches(list);
         setBranchId(list[0]?.id ?? null);
       })
-      .catch(() => setError('Could not load branches.'));
+      .catch(() => {
+        setError('Could not load branches.');
+        setLoading(false);
+      });
+  }, []);
+
+  // Re-check the clock every minute so a machine crossing the stuck limit is flagged without a reload.
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
   }, []);
 
   const reload = useCallback(async () => {
