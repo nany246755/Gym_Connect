@@ -1,6 +1,10 @@
 {
     "recommendations": [
+<<<<<<< Updated upstream
         "cirlorm.mobileview",
         "lirobi.phone-preview"
+=======
+        "cirlorm.mobileview"
+>>>>>>> Stashed changes
     ]
 }

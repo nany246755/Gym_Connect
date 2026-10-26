@@ -1,3 +1,11 @@
+<<<<<<< Updated upstream
+=======
+
+import * as Device from 'expo-device';
+import { Link } from 'expo-router';
+import { Platform, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+>>>>>>> Stashed changes
 
 import type { ComponentProps } from 'react';
 
@@ -124,6 +132,7 @@ export default function DevLauncherScreen() {
           </View>
         </View>
 
+<<<<<<< Updated upstream
         {/* Screen List */}
         <View style={[styles.inner, styles.list]}>
           {SCREENS.map((screen) => (
@@ -196,6 +205,30 @@ export default function DevLauncherScreen() {
         </View>
       </ScrollView>
     </View>
+=======
+        {/* Temporary navigation button for Spotting Requests */}
+        <Link
+          href="/member/spotting"
+          style={styles.spottingButton}
+        >
+          Open Spotting Requests
+        </Link>
+
+        <Link
+           href="/member/partners"
+          style={styles.spottingButton}
+         >
+           Open Workout Partners
+          </Link> 
+
+        <Link href="/member/messages">
+        Open Messages
+        </Link>
+        
+        {Platform.OS === 'web' && <WebBadge />}
+      </SafeAreaView>
+    </ThemedView>
+>>>>>>> Stashed changes
   );
 }
 
@@ -272,5 +305,19 @@ const styles = StyleSheet.create({
 
   screenOwner: {
     fontSize: 12,
+  },
+
+  // Temporary button styling
+  spottingButton: {
+    backgroundColor: '#2563EB',
+    color: '#FFFFFF',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    overflow: 'hidden',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    alignSelf: 'stretch',
   },
 });
