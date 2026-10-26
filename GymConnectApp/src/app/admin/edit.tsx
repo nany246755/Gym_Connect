@@ -103,7 +103,7 @@ export default function EquipmentFormScreen() {
                   placeholderTextColor={theme.textSecondary}
                   accessibilityLabel="Equipment name"
                   autoCapitalize="words"
-                  maxLength={50}
+                  maxLength={40}
                   onFocus={() => setFocused('name')}
                   onBlur={() => setFocused(null)}
                   style={inputStyle('name', errors.name)}

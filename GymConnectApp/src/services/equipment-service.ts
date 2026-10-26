@@ -5,7 +5,8 @@ import type { Equipment } from '@/types/equipment';
 
 // shortcut: mock data + admin edits saved on this device, because there is no database in the UI
 // phase. When Firebase is added, these become reads/writes on branches/{branchId}/equipment.
-const KEY = 'equipment';
+// v2: branch IDs changed to branch-001…004, so lists saved under the old key are ignored.
+const KEY = 'equipment-v2';
 
 async function loadAll(): Promise<Equipment[]> {
   const raw = await AsyncStorage.getItem(KEY);
