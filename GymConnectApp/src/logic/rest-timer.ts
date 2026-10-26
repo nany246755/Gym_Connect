@@ -1,8 +1,7 @@
 import type { RestTimerState, RestTimerStatus } from '@/types/rest-timer';
 
-// Pure state transitions for the rest timer. `now` is passed in so the timer survives the app
-// being closed: a running timer stores when it ends, not how much is left.
-
+// Pure timer calculations; the running timer stores its absolute end timestamp.
+// It therefore resumes accurately after navigation, suspension, or app restart.
 export const PRESETS_SEC = [30, 60, 90, 120];
 export const ADJUST_SEC = 15;
 const MIN_DURATION_SEC = 15;
@@ -49,25 +48,28 @@ export function reset(s: RestTimerState): RestTimerState {
   return { ...s, endsAt: null, pausedRemainingMs: null, totalMs: s.durationSec * 1000 };
 }
 
-// The rest is over: back to idle and on to the next set.
+// The rest finishes: the current visit advances to the next set.
 export function finish(s: RestTimerState): RestTimerState {
   return { ...reset(s), setNumber: s.setNumber + 1 };
 }
 
-// Each gym visit counts its own sets: when the check-in changes (check-out, or a new check-in after
-// forgetting to check out), go back to Set 1. Rest length and vibrate are preferences and stay.
+// The timer belongs to one attendance session. A DIFFERENT session — including
+// an explicit check-out (null) — cancels any running or paused rest, returning
+// to the selected duration and Set 1. Preferences remain unchanged.
 export function syncCheckIn(s: RestTimerState, checkInId: string | null): RestTimerState {
   if (s.checkInId === checkInId) return s;
-  return { ...s, checkInId, setNumber: 1 };
+  return { ...reset(s), checkInId, setNumber: 1 };
+}
+
+// Always reset after a confirmed checkout, even if the timer was unbound.
+export function resetAfterCheckout(s: RestTimerState): RestTimerState {
+  return { ...reset(s), checkInId: null, setNumber: 1 };
 }
 
 export function selectPreset(s: RestTimerState, durationSec: number): RestTimerState {
   return reset({ ...s, durationSec });
 }
 
-// +/- seconds: changes the current rest if one is going, otherwise the default length.
-// The ring's total stays the rest's full length, so removing time visibly empties the ring;
-// it only grows when adding time would overfill it.
 export function adjust(s: RestTimerState, deltaSec: number, now: number): RestTimerState {
   const deltaMs = deltaSec * 1000;
   if (s.endsAt !== null) {
