@@ -10,7 +10,7 @@ export const mockUser: User = {
   scheduleDays: ['Mon', 'Wed', 'Fri'],
   scheduleFrom: '18:00',
   scheduleTo: '20:00',
-  homeBranchId: 'new-cairo',
+  homeBranchId: 'branch-001',
   visibleInSearch: true,
   createdAt: '2026-10-01T00:00:00.000Z',
 };

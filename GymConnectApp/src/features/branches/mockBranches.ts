@@ -1,64 +1,63 @@
-
 import type { Branch } from '@/types/branch';
 
+// Canonical shared mock branch data: used by Branch Selection, Profile and Equipment.
+// The original IDs, photos, hours and checked-in counts are preserved.
+// Profile addresses, registered member totals and equipment zones were integrated.
 export const mockBranches: Branch[] = [
   {
     id: 'branch-001',
     name: 'New Cairo Branch',
     location: 'Fifth Settlement, New Cairo',
-
+    address: '90th Street, Fifth Settlement, New Cairo',
     operatingHours: '6:00 AM – 12:00 AM',
     openingTime: '06:00',
     closingTime: '00:00',
-
     checkedInCount: 24,
+    memberCount: 520,
+    zones: ['Strength', 'Cardio', 'Free weights'],
     isPreferred: true,
-
     image: require('../../../assets/images/New Cairo Branch.png'),
   },
-
   {
     id: 'branch-002',
     name: 'Nasr City Branch',
     location: 'Nasr City, Cairo',
-
+    address: 'Abbas El Akkad St, Nasr City, Cairo',
     operatingHours: '6:00 AM – 11:00 PM',
     openingTime: '06:00',
     closingTime: '23:00',
-
     checkedInCount: 18,
+    memberCount: 420,
+    zones: ['Strength', 'Cardio', 'Free weights'],
     isPreferred: false,
-
     image: require('../../../assets/images/Nasr City Branch.png'),
   },
-
   {
     id: 'branch-003',
     name: 'Sheikh Zayed Branch',
     location: 'Sheikh Zayed, Giza',
-
+    address: 'Central Axis, Sheikh Zayed, Giza',
     operatingHours: '7:00 AM – 10:00 PM',
     openingTime: '07:00',
     closingTime: '22:00',
-
     checkedInCount: 32,
+    memberCount: 610,
+    zones: ['Strength', 'Cardio', 'Functional'],
     isPreferred: false,
-
     image: require('../../../assets/images/Sheikh Zayed Branch.png'),
   },
-
   {
     id: 'branch-004',
     name: 'Maadi Branch',
     location: 'Maadi, Cairo',
-
+    address: 'Road 9, Maadi, Cairo',
     operatingHours: '6:00 AM – 11:00 PM',
     openingTime: '06:00',
     closingTime: '23:00',
-
     checkedInCount: 15,
+    memberCount: 380,
+    zones: ['Strength', 'Cardio'],
     isPreferred: false,
-
     image: require('../../../assets/images/Maadi Branch.png'),
   },
 ];

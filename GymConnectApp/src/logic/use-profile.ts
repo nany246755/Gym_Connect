@@ -1,6 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 
+import { useBranch } from '@/context/BranchContext';
 import { applyAppearance } from '@/logic/appearance';
 import { toggleInOrder, validateProfile } from '@/logic/profile';
 import { loadAppearance, saveAppearance } from '@/services/appearance-storage';
@@ -17,8 +18,9 @@ import {
   type WeekDay,
 } from '@/types/user';
 
-// ViewModel for the Member Profile screen (FR-9). Edits go into a draft until "Save profile".
+// ViewModel for the Member Profile screen (FR-9). Draft changes require Save profile.
 export function useProfile() {
+  const { setPreferredBranchId } = useBranch();
   const [saved, setSaved] = useState<User | null>(null);
   const [draft, setDraft] = useState<User | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -41,7 +43,6 @@ export function useProfile() {
       .finally(() => setLoading(false));
   }, []);
 
-  // "Profile saved" shows briefly, then the bottom bar hides.
   useEffect(() => {
     if (!justSaved) return;
     const id = setTimeout(() => setJustSaved(false), 2500);
@@ -63,7 +64,6 @@ export function useProfile() {
       dirty: JSON.stringify(draft) !== JSON.stringify(saved),
       saving,
       justSaved,
-      // Most errors wait for a save attempt; a too-early end time shows right away.
       errors: showErrors ? errors : { scheduleTime: errors.scheduleTime },
     },
     loading,
@@ -71,12 +71,12 @@ export function useProfile() {
     setFitnessLevel: (fitnessLevel: FitnessLevel) => edit(() => ({ fitnessLevel })),
     toggleTrainingStyle: (style: TrainingStyle) =>
       edit((u) => ({ trainingStyles: toggleInOrder(TRAINING_STYLES, u.trainingStyles, style) })),
-    toggleDay: (day: WeekDay) => edit((u) => ({ scheduleDays: toggleInOrder(WEEK_DAYS, u.scheduleDays, day) })),
+    toggleDay: (day: WeekDay) =>
+      edit((u) => ({ scheduleDays: toggleInOrder(WEEK_DAYS, u.scheduleDays, day) })),
     setScheduleFrom: (scheduleFrom: string) => edit(() => ({ scheduleFrom })),
     setScheduleTo: (scheduleTo: string) => edit(() => ({ scheduleTo })),
     setHomeBranch: (homeBranchId: string) => edit(() => ({ homeBranchId })),
     setVisibleInSearch: (visibleInSearch: boolean) => edit(() => ({ visibleInSearch })),
-    // shortcut: keeps the picker's local file URI; upload it to Firebase Storage once that exists.
     pickAvatar: async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -84,7 +84,9 @@ export function useProfile() {
         aspect: [1, 1],
         quality: 0.7,
       });
-      if (!result.canceled && result.assets[0]) edit(() => ({ avatarUrl: result.assets[0].uri }));
+      if (!result.canceled && result.assets[0]) {
+        edit(() => ({ avatarUrl: result.assets[0].uri }));
+      }
     },
     setAppearance: (mode: AppearanceMode) => {
       setAppearanceState(mode);
@@ -99,6 +101,8 @@ export function useProfile() {
       setError(null);
       try {
         await saveProfile(clean);
+        // Update other screens only after the profile was successfully saved.
+        setPreferredBranchId(clean.homeBranchId);
         setSaved(clean);
         setDraft(clean);
         setShowErrors(false);

@@ -12,6 +12,7 @@ import {
   AppState,
   Modal,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 import {
@@ -20,6 +21,7 @@ import {
 } from 'react-native-safe-area-context';
 
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/constants/theme';
@@ -40,6 +42,7 @@ export default function BranchScreen() {
 
   const {
     activeCheckIn,
+    preferredBranchId,
     startDemoCheckIn,
     endDemoCheckIn,
   } = useBranch();
@@ -119,6 +122,8 @@ export default function BranchScreen() {
   const branchesWithStatus: BranchWithStatus[] =
     mockBranches.map((branch) => ({
       ...branch,
+      // Preferred branch comes from the saved Profile selection.
+      isPreferred: branch.id === preferredBranchId,
       isOpen: isBranchOpen(
         branch.openingTime,
         branch.closingTime,
@@ -156,7 +161,7 @@ export default function BranchScreen() {
   };
 
   // Check In
-  const handleDemoCheckIn = (branchId: string) => {
+  const handleDemoCheckIn = async (branchId: string) => {
     const branch = branchesWithStatus.find(
       (item) => item.id === branchId
     );
@@ -169,12 +174,14 @@ export default function BranchScreen() {
       return;
     }
 
-    const success = startDemoCheckIn(branchId);
+    const success = await startDemoCheckIn(branchId);
 
     if (success) {
       showSuccessToast(
         `Successfully checked in at ${branch.name}`
       );
+    } else {
+      Alert.alert('Check-in unavailable', 'Your attendance could not be saved. Please try again.');
     }
   };
 
@@ -214,17 +221,19 @@ export default function BranchScreen() {
       setTimeout(resolve, 1000);
     });
 
-    // End local demo attendance
-    endDemoCheckIn();
+    // Checkout is confirmed only after the attendance state is saved.
+    // The shared timer provider resets the running/paused rest timer.
+    const success = await endDemoCheckIn();
 
-    // Close popup
-    setIsCheckOutModalVisible(false);
     setIsCheckingOut(false);
 
-    // Show success notification
-    showSuccessToast(
-      `Successfully checked out of ${branchName}`
-    );
+    if (!success) {
+      Alert.alert('Check-out unavailable', 'Your check-out could not be saved. Please try again.');
+      return;
+    }
+
+    setIsCheckOutModalVisible(false);
+    showSuccessToast(`Successfully checked out of ${branchName}`);
   };
 
   const clearSearch = () => {
@@ -273,8 +282,11 @@ export default function BranchScreen() {
             </Text>
           </View>
 
-          {/* Profile icon */}
-          <View
+          {/* Profile icon: open teammate's Profile screen. */}
+          <Pressable
+            onPress={() => router.push('/member/profile')}
+            accessibilityRole="button"
+            accessibilityLabel="Open my profile"
             style={[
               styles.profileIcon,
               {
@@ -288,7 +300,7 @@ export default function BranchScreen() {
               size={24}
               color={colors.text}
             />
-          </View>
+          </Pressable>
         </View>
 
         {/* Search Bar */}
