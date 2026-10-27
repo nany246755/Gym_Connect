@@ -96,6 +96,9 @@ export const Colors = {
 
     //success
     successSoft: '#DCFCE7',
+
+    // "Available soon" tile on the dashboard
+    soonSoft: '#FFF1D6',
   },
 
   dark: {
@@ -179,6 +182,9 @@ export const Colors = {
 
     //success
     successSoft: '#1B3D35',
+
+    // "Available soon" tile on the dashboard: a dark yellow, like successSoft and dangerSoft
+    soonSoft: '#4A3A1A',
   },
 } as const;
 

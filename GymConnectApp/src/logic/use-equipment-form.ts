@@ -262,6 +262,9 @@ export function useEquipmentForm(
       branches,
       branchIds,
       zones: commonZones(branches, branchIds),
+      // What the photo box shows: the admin's photo, else the bundled one for this name, else nothing.
+      image: item ? equipmentImage(item) : undefined,
+      hasOwnPhoto: !!item?.imageUrl,
       isNew: !id,
       saving,
       errors: showErrors ? errors : {},

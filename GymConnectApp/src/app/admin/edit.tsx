@@ -1,4 +1,4 @@
-
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
@@ -23,6 +23,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Icons } from '@/constants/icons';
 import { MaxContentWidth, NoWebOutline, Spacing } from '@/constants/theme';
+import { useKeyboardVisible } from '@/hooks/use-keyboard-visible';
 import { useTheme } from '@/hooks/use-theme';
 import { MUSCLE_LABEL, STATUS_LABEL } from '@/logic/equipment';
 import { useEquipmentForm } from '@/logic/use-equipment-form';
@@ -35,8 +36,22 @@ export default function EquipmentFormScreen() {
   const { id, branchId } = useLocalSearchParams<{ id?: string; branchId?: string }>();
   const [sheet, setSheet] = useState<'branch' | 'zone' | null>(null);
   const [focused, setFocused] = useState<'name' | 'station' | null>(null);
-  const { data, loading, error, setName, setStation, setZone, toggleBranch, toggleAllBranches, setMuscleGroup, setStatus, setFloorPlacementEnabled, setFloorPlacementField, save } =
-    useEquipmentForm(id, branchId);
+  const keyboardVisible = useKeyboardVisible();
+  const {
+    data,
+    loading,
+    error,
+    setName,
+    setStation,
+    setZone,
+    toggleBranch,
+    toggleAllBranches,
+    setMuscleGroup,
+    setStatus,
+    pickPhoto,
+    removePhoto,
+    save,
+  } = useEquipmentForm(id, branchId);
 
   // Back to the inventory, even when this page was opened directly (no screen to go back to).
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/admin'));
@@ -96,6 +111,33 @@ export default function EquipmentFormScreen() {
           </View>
 
           <View style={[styles.inner, styles.body]}>
+            <Card>
+              <View style={[styles.photo, { backgroundColor: theme.accentSoft }]}>
+                {data.image ? (
+                  <Image
+                    source={data.image}
+                    style={styles.photoImage}
+                    contentFit="cover"
+                    accessibilityLabel={`Photo of ${item.name.trim() || 'the equipment'}`}
+                  />
+                ) : (
+                  <SymbolView name={Icons.equipment} size={40} tintColor={theme.accent} />
+                )}
+              </View>
+              <View style={styles.row}>
+                <Button
+                  variant="secondary"
+                  icon={Icons.camera}
+                  title={data.image ? 'Change photo' : 'Add photo'}
+                  onPress={pickPhoto}
+                  style={styles.flex}
+                />
+                {data.hasOwnPhoto && (
+                  <Button variant="secondary" icon={Icons.remove} title="Remove" onPress={removePhoto} />
+                )}
+              </View>
+            </Card>
+
             <Card>
               <Field label="Equipment name" error={errors.name}>
                 <TextInput
@@ -273,30 +315,33 @@ export default function EquipmentFormScreen() {
           </View>
         </ScrollView>
 
-        <View
-          style={[
-            styles.saveBar,
-            { backgroundColor: theme.backgroundElement, borderColor: theme.border, paddingBottom: insets.bottom + Spacing.three },
-          ]}>
-          <Button variant="secondary" title="Cancel" onPress={leave} style={styles.flex} />
-          <Button
-            icon={Icons.check}
-            title={
-              data.saving
-                ? 'Saving…'
-                : !data.isNew
-                  ? 'Save'
-                  : chosen.length > 1
-                    ? `Add to ${chosen.length} branches`
-                    : 'Add'
-            }
-            disabled={data.saving}
-            onPress={async () => {
-              if (await save()) leave();
-            }}
-            style={styles.saveButton}
-          />
-        </View>
+        {/* Hidden while typing so the form gets the space; it comes back when the keyboard closes. */}
+        {!keyboardVisible && (
+          <View
+            style={[
+              styles.saveBar,
+              { backgroundColor: theme.backgroundElement, borderColor: theme.border, paddingBottom: insets.bottom + Spacing.three },
+            ]}>
+            <Button variant="secondary" title="Cancel" onPress={leave} style={styles.flex} />
+            <Button
+              icon={Icons.check}
+              title={
+                data.saving
+                  ? 'Saving…'
+                  : !data.isNew
+                    ? 'Save'
+                    : chosen.length > 1
+                      ? `Add to ${chosen.length} branches`
+                      : 'Add'
+              }
+              disabled={data.saving}
+              onPress={async () => {
+                if (await save()) leave();
+              }}
+              style={styles.saveButton}
+            />
+          </View>
+        )}
       </KeyboardAvoidingView>
 
       <BottomSheet
@@ -452,6 +497,14 @@ const styles = StyleSheet.create({
   body: { gap: Spacing.three, marginTop: Spacing.three },
   card: { borderWidth: 1, borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.three },
   field: { gap: Spacing.one },
+  photo: {
+    height: 180,
+    borderRadius: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  photoImage: { width: '100%', height: '100%' },
   input: {
     minHeight: 48,
     borderWidth: 1,

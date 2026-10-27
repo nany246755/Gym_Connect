@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useEffect, useState } from 'react';
+
 import {
   View,
   Text,
@@ -13,10 +15,7 @@ import {
   Alert,
 } from 'react-native';
 
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -61,37 +60,6 @@ export default function BranchScreen() {
 
   const [isCheckingOut, setIsCheckingOut] =
     useState(false);
-
-  // Temporary success notification
-  const [toastMessage, setToastMessage] =
-    useState<string | null>(null);
-
-  const toastTimer = useRef<
-    ReturnType<typeof setTimeout> | null
-  >(null);
-
-  // Display success notification for 3 seconds
-  const showSuccessToast = (message: string) => {
-    if (toastTimer.current !== null) {
-      clearTimeout(toastTimer.current);
-    }
-
-    setToastMessage(message);
-
-    toastTimer.current = setTimeout(() => {
-      setToastMessage(null);
-      toastTimer.current = null;
-    }, 3000);
-  };
-
-  // Clean up notification timer
-  useEffect(() => {
-    return () => {
-      if (toastTimer.current !== null) {
-        clearTimeout(toastTimer.current);
-      }
-    };
-  }, []);
 
   // Refresh branch availability
   useEffect(() => {
@@ -173,9 +141,8 @@ export default function BranchScreen() {
     const success = await startDemoCheckIn(branchId);
 
     if (success) {
-      showSuccessToast(
-        `Successfully checked in at ${branch.name}`
-      );
+      // Back to the dashboard, which now shows this branch as checked in.
+      router.dismissTo('/member/dashboard');
     } else {
       Alert.alert(
         'Check-in unavailable',
@@ -212,6 +179,7 @@ export default function BranchScreen() {
     const branchName =
       activeBranch?.name ?? 'your branch';
 
+    // Show loading state
     setIsCheckingOut(true);
 
     await new Promise<void>((resolve) => {
@@ -234,6 +202,9 @@ export default function BranchScreen() {
     showSuccessToast(
       `Successfully checked out of ${branchName}`
     );
+
+    // Back to the dashboard, which now shows "not checked in".
+    router.dismissTo('/member/dashboard');
   };
 
   const clearSearch = () => {
@@ -253,6 +224,71 @@ export default function BranchScreen() {
         keyboardDismissMode="on-drag"
       >
         {/* Header */}
+        <View style={styles.header}>
+          {/* Back arrow: return to the dashboard without changing the check-in. */}
+          <Pressable
+            onPress={() => router.dismissTo('/member/dashboard')}
+            accessibilityRole="button"
+            accessibilityLabel="Back to dashboard"
+            style={styles.backButton}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={colors.text}
+            />
+          </Pressable>
+
+          <Image
+            source={require(
+              '../../../assets/images/logo(notext).jpeg'
+            )}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <View style={styles.headerText}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text },
+              ]}
+            >
+              Gym Connect
+            </Text>
+
+            <Text
+              style={[
+                styles.subtitle,
+                { color: colors.textSecondary },
+              ]}
+            >
+              Find your gym branch
+            </Text>
+          </View>
+
+          {/* Profile icon: open teammate's Profile screen. */}
+          <Pressable
+            onPress={() => router.push('/member/profile')}
+            accessibilityRole="button"
+            accessibilityLabel="Open my profile"
+            style={[
+              styles.profileIcon,
+              {
+                backgroundColor:
+                  colors.backgroundElement,
+              },
+            ]}
+          >
+            <Ionicons
+              name="person-outline"
+              size={24}
+              color={colors.text}
+            />
+          </Pressable>
+        </View>
+
+        {/* Search Bar */}
         <View
           style={[
             styles.hero,
@@ -672,6 +708,17 @@ const styles = StyleSheet.create({
 
   heroTextBlock: {
     flex: 1,
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -Spacing.two,
+  },
+
+  logo: {
+    width: 65,
+    height: 50,
   },
 
   brand: {
@@ -820,6 +867,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
+  // Check Out confirmation popup
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
