@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
+import { MEMBER_TAB_BAR_SPACE, useHideMemberTabBar } from '@/components/member-tab-bar';
 import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -68,6 +69,10 @@ export default function ProfileScreen() {
     discard,
   } = useProfile();
 
+  // The Save bar takes the nav bar's place while it shows.
+  const showSaveBar = data.dirty || data.justSaved;
+  useHideMemberTabBar(showSaveBar);
+
   const user = data.user;
 
   if (loading || !user) {
@@ -101,7 +106,11 @@ export default function ProfileScreen() {
     <ThemedView style={styles.container}>
       <StatusBar style="light" />
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scroll,
+          !showSaveBar && { paddingBottom: MEMBER_TAB_BAR_SPACE + insets.bottom },
+        ]}>
         {/* Profile Header */}
         <View
           style={[
@@ -485,7 +494,7 @@ export default function ProfileScreen() {
       </ScrollView>
 
       {/* Save / Discard Bar */}
-      {(data.dirty || data.justSaved) && (
+      {showSaveBar && (
         <View
           style={[
             styles.saveBar,
@@ -866,6 +875,7 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     paddingVertical: Spacing.one,
     paddingHorizontal: Spacing.three,
+    borderRadius: 999, // fully rounded pill
   },
 
   body: {

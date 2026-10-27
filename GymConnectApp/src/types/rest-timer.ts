@@ -1,4 +1,4 @@
-// Saved on the device only (AsyncStorage) — see CLAUDE.md §6.
+// Kept in memory only during the UI phase (no storage yet) — see services/rest-timer-storage.ts.
 export type RestTimerState = {
   durationSec: number; // selected rest length
   endsAt: number | null; // epoch ms while running; null when idle or paused

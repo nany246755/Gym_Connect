@@ -1,7 +1,13 @@
+import { equipmentImages } from '@/data/equipment-images';
 import type { Branch } from '@/types/branch';
 import type { Equipment, EquipmentStatus, MuscleGroup } from '@/types/equipment';
 
 // Pure helpers for the admin equipment screens.
+
+// The admin's own photo first, then the bundled photo for that machine type; undefined → show the icon.
+export function equipmentImage(e: Pick<Equipment, 'name' | 'imageUrl'>): number | string | undefined {
+  return e.imageUrl ?? equipmentImages[e.name.trim().toLowerCase()];
+}
 
 export const STATUS_LABEL: Record<EquipmentStatus, string> = {
   Available: 'Available',

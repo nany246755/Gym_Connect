@@ -11,7 +11,7 @@ export const mockBranches: Branch[] = [
     address: '90th Street, Fifth Settlement, New Cairo',
     operatingHours: '6:00 AM – 12:00 AM',
     openingTime: '06:00',
-    closingTime: '00:00',
+    closingTime: '04:00',
     checkedInCount: 24,
     memberCount: 520,
     zones: ['Strength', 'Cardio', 'Free weights'],

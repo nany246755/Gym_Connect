@@ -14,7 +14,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Icons } from '@/constants/icons';
 import { MaxContentWidth, NoWebOutline, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { isStuck, MUSCLE_LABEL, occupiedFor, STATUS_LABEL, type StatusFilter } from '@/logic/equipment';
+import { equipmentImage, isStuck, MUSCLE_LABEL, occupiedFor, STATUS_LABEL, type StatusFilter } from '@/logic/equipment';
 import { useEquipmentInventory } from '@/logic/use-equipment-inventory';
 import { EQUIPMENT_STATUSES, type Equipment, type EquipmentStatus } from '@/types/equipment';
 
@@ -178,6 +178,7 @@ export default function EquipmentInventoryScreen() {
         renderItem={({ item }) => {
           const stuck = isStuck(item, data.now);
           const color = statusColor[item.status];
+          const image = equipmentImage(item);
           return (
             <View style={styles.inner}>
               <View
@@ -188,8 +189,8 @@ export default function EquipmentInventoryScreen() {
                 ]}>
                 <View style={[styles.row, styles.itemTop]}>
                   <View style={[styles.thumb, { backgroundColor: theme.accentSoft }]}>
-                    {item.imageUrl ? (
-                      <Image source={item.imageUrl} style={styles.thumbImage} contentFit="cover" />
+                    {image ? (
+                      <Image source={image} style={styles.thumbImage} contentFit="cover" />
                     ) : (
                       <SymbolView name={Icons.equipment} size={22} tintColor={theme.accent} />
                     )}
