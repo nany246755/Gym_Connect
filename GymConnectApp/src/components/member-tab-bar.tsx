@@ -1,4 +1,4 @@
-import { router, usePathname } from 'expo-router';
+import { router, usePathname, type Href } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -89,9 +89,12 @@ function SpotterIcon({ color, accent, size }: { color: string; accent: string; s
 }
 
 // Where each tab goes. Home goes back to the dashboard instead of stacking a new one.
-// shortcut: Equipment, Spotter and Partners wait for the team's screens.
-const OPEN: Partial<Record<MemberTab, () => void>> = {
+// Equipment is cast because its screen (src/app/member/equipment/index.tsx) is still being merged.
+const OPEN: Record<MemberTab, () => void> = {
   home: () => router.dismissTo('/member/dashboard'),
+  equipment: () => router.push('/member/equipment' as Href),
+  spotter: () => router.push('/member/spotting'),
+  partners: () => router.push('/member/partners'),
   profile: () => router.push('/member/profile'),
 };
 

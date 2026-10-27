@@ -1,15 +1,21 @@
 
 import { useEffect, useState } from 'react';
+
+import { mockUser } from '@/data/mock-user';
+import { firstName } from '@/logic/dashboard';
+
 import type {
   CancellationReason,
   SpottingRequest,
 } from './types';
 
 const REQUEST_DURATION = 2 * 60 * 1000;
-const CURRENT_BRANCH_ID = 'midtown';
+// The signed-in member's home branch, from the same mock user as My Profile.
+const CURRENT_BRANCH_ID = mockUser.homeBranchId;
 
-const DEMO_MEMBERS = {
-  'member-2': 'AJ',
+// 'member-2' is the signed-in member (shown by their first name); Omar is the test member.
+export const DEMO_MEMBERS = {
+  'member-2': firstName(mockUser.fullName),
   'member-omar': 'Omar',
 };
 

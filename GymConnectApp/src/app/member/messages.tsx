@@ -19,6 +19,9 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { mockUser } from '@/data/mock-user';
+import { firstName } from '@/logic/dashboard';
+
 import {
   useMessaging,
 } from '../../features/messaging/MessagingContext';
@@ -44,7 +47,7 @@ const C = {
 };
 
 const MEMBER_NAMES: Record<string, string> = {
-  'member-aj': 'Alex Johnson',
+  'member-aj': mockUser.fullName, // the signed-in member, same as My Profile
   'member-maya': 'Maya Brooks',
   'member-omar': 'Omar Hassan',
   'member-jordan': 'Jordan Lee',
@@ -168,7 +171,7 @@ useEffect(() => {
 
   handledPartnerRef.current = requestedPartnerId;
 
-  // Return to AJ when opening a conversation
+  // Return to the signed-in member when opening a conversation
   // from their Workout Partners screen.
 
   setCurrentMemberId('member-aj');
@@ -669,7 +672,7 @@ useEffect(() => {
             accessibilityLabel="Switch demo member"
           >
             <Text style={styles.demoSwitchText}>
-              {currentMemberId.toUpperCase()} ⇄
+              {firstName(MEMBER_NAMES[currentMemberId]).toUpperCase()} ⇄
             </Text>
           </Pressable>
         </View>

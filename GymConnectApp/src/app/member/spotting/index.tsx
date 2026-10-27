@@ -10,9 +10,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MEMBER_TAB_BAR_SPACE } from '@/components/member-tab-bar';
+import { mockUserBranchName } from '@/data/mock-user';
 import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedSpottingRequests } from '../../../features/spotting/SpottingRequestsProvider';
+import { DEMO_MEMBERS } from '../../../features/spotting/useSpottingRequests';
 import type { CancellationReason, SpottingRequest } from '../../../features/spotting/types';
 
 const CANCEL_REASONS: CancellationReason[] = [
@@ -95,7 +98,7 @@ export default function SpottingScreen() {
           <View style={styles.logo}><Text style={styles.logoText}>G</Text></View>
           <Text style={styles.brandText}>GYM CONNECT</Text>
         </View>
-        <View style={styles.branch}><Text style={styles.branchText}>Midtown</Text></View>
+        <View style={styles.branch}><Text style={styles.branchText}>{mockUserBranchName}</Text></View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -139,7 +142,7 @@ export default function SpottingScreen() {
             {availableRequests.length > 0 ? availableRequests.map(requestCard) : (
               <View style={styles.empty}>
                 <Text style={styles.emptyTitle}>No nearby requests</Text>
-                <Text style={styles.muted}>New requests from checked-in members at Midtown will appear here.</Text>
+                <Text style={styles.muted}>New requests from checked-in members at {mockUserBranchName} will appear here.</Text>
               </View>
             )}
             <Text style={styles.footerNote}>Unaccepted requests expire after 2 minutes.</Text>
@@ -168,7 +171,7 @@ export default function SpottingScreen() {
                   <>
                     <View style={styles.infoBox}>
                       <Text style={styles.infoTitle}>Help is on the way</Text>
-                      <Text style={styles.detail}>Spotter: {myActiveRequest.acceptedBy === 'member-omar' ? 'Omar' : myActiveRequest.acceptedBy === 'member-2' ? 'AJ' : myActiveRequest.acceptedBy}</Text>
+                      <Text style={styles.detail}>Spotter: {DEMO_MEMBERS[myActiveRequest.acceptedBy as keyof typeof DEMO_MEMBERS] ?? myActiveRequest.acceptedBy}</Text>
                     </View>
                     <Pressable style={styles.darkButton} onPress={() => completeRequest(myActiveRequest.id)}>
                       <Text style={styles.darkButtonText}>Mark request as finished</Text>
@@ -226,7 +229,7 @@ export default function SpottingScreen() {
                 onPress={() => setCurrentUserId(id)}
               >
                 <Text style={[styles.testText, currentUserId === id && styles.testSelectedText]}>
-                  {id === 'member-2' ? 'AJ' : 'Omar'}
+                  {DEMO_MEMBERS[id]}
                 </Text>
               </Pressable>
             ))}
@@ -262,7 +265,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>) => StyleSheet.create(
   brandText: { color: colors.heroText, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
   branch: { borderWidth: 1, borderColor: colors.heroChip, paddingHorizontal: 13, paddingVertical: 8, borderRadius: 20 },
   branchText: { color: colors.heroText, fontWeight: '700', fontSize: 12 },
-  content: { padding: 18, paddingBottom: 46, gap: 12 },
+  content: { padding: 18, paddingBottom: MEMBER_TAB_BAR_SPACE, gap: 12 }, // clears the nav bar
   eyebrow: { fontWeight: '800', fontSize: 10, letterSpacing: 1.4, color: colors.accentText, marginTop: 8 },
   title: { color: colors.text, fontSize: 30, fontWeight: '800', marginBottom: 9 },
   tabs: { backgroundColor: colors.backgroundSelected, borderRadius: 14, padding: 4, flexDirection: 'row', gap: 4 },

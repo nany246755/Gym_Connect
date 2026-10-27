@@ -9,6 +9,8 @@ export default function MemberLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         {/* Tab screens fade into each other instead of sliding in. */}
         <Stack.Screen name="dashboard" options={{ animation: 'fade', animationDuration: 250 }} />
+        <Stack.Screen name="spotting/index" options={{ animation: 'fade', animationDuration: 250 }} />
+        <Stack.Screen name="partners" options={{ animation: 'fade', animationDuration: 250 }} />
         <Stack.Screen name="profile" options={{ animation: 'fade', animationDuration: 250 }} />
       </Stack>
     </MemberTabLayout>
