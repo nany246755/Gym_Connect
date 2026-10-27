@@ -1,12 +1,3 @@
-<<<<<<< Updated upstream
-=======
-
-import * as Device from 'expo-device';
-import { Link } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
->>>>>>> Stashed changes
-
 import type { ComponentProps } from 'react';
 
 import {
@@ -35,19 +26,22 @@ import {
 
 import { useTheme } from '@/hooks/use-theme';
 
-// Icon type supported by Ionicons
-type IconName = ComponentProps<typeof Ionicons>['name'];
+// ==========================================
+// TYPES
+// ==========================================
 
-// Temporary development launcher.
-// Allows teammates to test their screens independently
-// until the final Member Dashboard is completed.
+type IconName = ComponentProps<typeof Ionicons>['name'];
 
 type ScreenItem = {
   title: string;
-  route: string;
+  route: Href;
   owner: string;
   icon: IconName;
 };
+
+// ==========================================
+// DEVELOPMENT SCREENS
+// ==========================================
 
 const SCREENS: ScreenItem[] = [
   {
@@ -56,6 +50,7 @@ const SCREENS: ScreenItem[] = [
     owner: 'Branch Selection',
     icon: 'business-outline',
   },
+ 
   {
     title: 'Rest Timer',
     route: '/member/timer',
@@ -74,7 +69,34 @@ const SCREENS: ScreenItem[] = [
     owner: 'Member 3 - Andro',
     icon: 'construct-outline',
   },
+
+  // ======================================
+  // YOUR SCREENS — FR05 TO FR08
+  // ======================================
+
+  {
+    title: 'Spotting Requests',
+    route: '/member/spotting',
+    owner: 'FR05 & FR06 - Spotting Requests',
+    icon: 'shield-checkmark-outline',
+  },
+  {
+    title: 'Workout Partners',
+    route: '/member/partners',
+    owner: 'FR07 - Find Workout Partners',
+    icon: 'people-outline',
+  },
+  {
+    title: 'Messages',
+    route: '/member/messages',
+    owner: 'FR08 - Conversations & Chat',
+    icon: 'chatbubbles-outline',
+  },
 ];
+
+// ==========================================
+// DEVELOPMENT LAUNCHER
+// ==========================================
 
 export default function DevLauncherScreen() {
   const colors = useTheme();
@@ -83,25 +105,53 @@ export default function DevLauncherScreen() {
   const isDark =
     colors.background === Colors.dark.background;
 
-  const handleNavigation = (route: string) => {
-    router.push(route as Href);
-  };
+  const cardBackground = isDark
+    ? '#1C2A42'
+    : '#FFFFFF';
+
+  const cardBorder = isDark
+    ? '#34435B'
+    : '#E7EAF0';
+
+  const primaryText = isDark
+    ? '#FFFFFF'
+    : '#14213D';
+
+  const secondaryText = isDark
+    ? '#B8C3D4'
+    : '#718096';
+
+  const iconBackground = isDark
+    ? '#283852'
+    : '#F0F2F6';
+
+  function handleNavigation(route: Href) {
+    router.push(route);
+  }
 
   return (
     <View
       style={[
         styles.container,
-        { backgroundColor: colors.background },
+        {
+          backgroundColor: colors.background,
+        },
       ]}
     >
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar
+        style={isDark ? 'light' : 'dark'}
+      />
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: insets.bottom + Spacing.five,
         }}
       >
-        {/* Header */}
+        {/* ==================================
+            HEADER
+        ================================== */}
+
         <View
           style={[
             styles.hero,
@@ -115,7 +165,9 @@ export default function DevLauncherScreen() {
             <Text
               style={[
                 styles.brand,
-                { color: colors.marigold },
+                {
+                  color: colors.marigold,
+                },
               ]}
             >
               GYM CONNECT
@@ -126,111 +178,93 @@ export default function DevLauncherScreen() {
             </Text>
 
             <Text style={styles.heroSubtitle}>
-              Temporary development launcher for the
-              Gym Connect team
+              Temporary development launcher for the Gym Connect team
             </Text>
           </View>
         </View>
 
-<<<<<<< Updated upstream
-        {/* Screen List */}
-        <View style={[styles.inner, styles.list]}>
-          {SCREENS.map((screen) => (
-            <Pressable
-              key={screen.route}
-              accessibilityRole="button"
-              accessibilityLabel={`Open ${screen.title}`}
-              onPress={() =>
-                handleNavigation(screen.route)
-              }
-              style={({ pressed }) => [
-                styles.card,
-                {
-                  backgroundColor:
-                    colors.backgroundElement,
+        {/* ==================================
+            SCREEN CARDS
+        ================================== */}
 
-                  borderColor:
-                    colors.backgroundSelected,
-
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              {/* Screen Icon */}
-              <View
-                style={[
-                  styles.iconContainer,
+        <View style={styles.inner}>
+          <View style={styles.list}>
+            {SCREENS.map(screen => (
+              <Pressable
+                key={screen.title}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${screen.title}`}
+                onPress={() =>
+                  handleNavigation(screen.route)
+                }
+                style={({ pressed }) => [
+                  styles.card,
                   {
-                    backgroundColor:
-                      colors.backgroundSelected,
+                    backgroundColor: cardBackground,
+                    borderColor: cardBorder,
+                    opacity: pressed ? 0.8 : 1,
                   },
                 ]}
               >
+                {/* Icon */}
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      backgroundColor: iconBackground,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={screen.icon}
+                    size={25}
+                    color={colors.marigold}
+                  />
+                </View>
+
+                {/* Screen information */}
+                <View style={styles.screenInfo}>
+                  <Text
+                    style={[
+                      styles.screenTitle,
+                      {
+                        color: primaryText,
+                      },
+                    ]}
+                  >
+                    {screen.title}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.screenOwner,
+                      {
+                        color: secondaryText,
+                      },
+                    ]}
+                  >
+                    {screen.owner}
+                  </Text>
+                </View>
+
+                {/* Arrow */}
                 <Ionicons
-                  name={screen.icon}
-                  size={23}
-                  color={colors.marigold}
+                  name="chevron-forward"
+                  size={22}
+                  color={secondaryText}
                 />
-              </View>
-
-              {/* Screen Information */}
-              <View style={styles.screenInfo}>
-                <Text
-                  style={[
-                    styles.screenTitle,
-                    { color: colors.text },
-                  ]}
-                >
-                  {screen.title}
-                </Text>
-
-                <Text
-                  style={[
-                    styles.screenOwner,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  {screen.owner}
-                </Text>
-              </View>
-
-              {/* Navigation Arrow */}
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={colors.textSecondary}
-              />
-            </Pressable>
-          ))}
+              </Pressable>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </View>
-=======
-        {/* Temporary navigation button for Spotting Requests */}
-        <Link
-          href="/member/spotting"
-          style={styles.spottingButton}
-        >
-          Open Spotting Requests
-        </Link>
-
-        <Link
-           href="/member/partners"
-          style={styles.spottingButton}
-         >
-           Open Workout Partners
-          </Link> 
-
-        <Link href="/member/messages">
-        Open Messages
-        </Link>
-        
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
->>>>>>> Stashed changes
   );
 }
+
+// ==========================================
+// STYLES
+// ==========================================
 
 const styles = StyleSheet.create({
   container: {
@@ -239,8 +273,8 @@ const styles = StyleSheet.create({
 
   hero: {
     paddingBottom: Spacing.five,
-    borderBottomLeftRadius: Spacing.five,
-    borderBottomRightRadius: Spacing.five,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
   },
 
   inner: {
@@ -278,9 +312,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
+
     gap: Spacing.three,
+
     minHeight: 76,
     padding: Spacing.three,
+
     borderWidth: 1,
     borderRadius: 16,
   },
@@ -289,6 +326,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 14,
+
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -305,19 +343,5 @@ const styles = StyleSheet.create({
 
   screenOwner: {
     fontSize: 12,
-  },
-
-  // Temporary button styling
-  spottingButton: {
-    backgroundColor: '#2563EB',
-    color: '#FFFFFF',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    overflow: 'hidden',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    alignSelf: 'stretch',
   },
 });
