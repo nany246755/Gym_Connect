@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
-
 import { useEffect, useState } from 'react';
 
 import {
@@ -33,7 +31,6 @@ import type { BranchWithStatus } from '@/types/branch';
 
 export default function BranchScreen() {
   const colors = useTheme();
-  const insets = useSafeAreaInsets();
 
   const {
     activeCheckIn,
@@ -131,6 +128,7 @@ export default function BranchScreen() {
     );
 
     if (!branch || !branch.isOpen) {
+      Alert.alert('Branch unavailable', 'This branch is currently closed.');
       return;
     }
 
@@ -142,7 +140,7 @@ export default function BranchScreen() {
 
     if (success) {
       // Back to the dashboard, which now shows this branch as checked in.
-      router.dismissTo('/member/dashboard');
+      router.replace('/member/Dashboard');
     } else {
       Alert.alert(
         'Check-in unavailable',
@@ -176,9 +174,6 @@ export default function BranchScreen() {
       return;
     }
 
-    const branchName =
-      activeBranch?.name ?? 'your branch';
-
     // Show loading state
     setIsCheckingOut(true);
 
@@ -199,12 +194,8 @@ export default function BranchScreen() {
     }
 
     setIsCheckOutModalVisible(false);
-    showSuccessToast(
-      `Successfully checked out of ${branchName}`
-    );
-
     // Back to the dashboard, which now shows "not checked in".
-    router.dismissTo('/member/dashboard');
+    router.replace('/member/Dashboard');
   };
 
   const clearSearch = () => {
@@ -223,72 +214,7 @@ export default function BranchScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* Header */}
-        <View style={styles.header}>
-          {/* Back arrow: return to the dashboard without changing the check-in. */}
-          <Pressable
-            onPress={() => router.dismissTo('/member/dashboard')}
-            accessibilityRole="button"
-            accessibilityLabel="Back to dashboard"
-            style={styles.backButton}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.text}
-            />
-          </Pressable>
-
-          <Image
-            source={require(
-              '../../../assets/images/logo(notext).jpeg'
-            )}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
-          <View style={styles.headerText}>
-            <Text
-              style={[
-                styles.title,
-                { color: colors.text },
-              ]}
-            >
-              Gym Connect
-            </Text>
-
-            <Text
-              style={[
-                styles.subtitle,
-                { color: colors.textSecondary },
-              ]}
-            >
-              Find your gym branch
-            </Text>
-          </View>
-
-          {/* Profile icon: open teammate's Profile screen. */}
-          <Pressable
-            onPress={() => router.push('/member/profile')}
-            accessibilityRole="button"
-            accessibilityLabel="Open my profile"
-            style={[
-              styles.profileIcon,
-              {
-                backgroundColor:
-                  colors.backgroundElement,
-              },
-            ]}
-          >
-            <Ionicons
-              name="person-outline"
-              size={24}
-              color={colors.text}
-            />
-          </Pressable>
-        </View>
-
-        {/* Search Bar */}
+        {/* Branch Header */}
         <View
           style={[
             styles.hero,
@@ -296,6 +222,15 @@ export default function BranchScreen() {
           ]}
         >
           <View style={styles.heroTopRow}>
+            <Pressable
+              onPress={() => router.replace('/member/Dashboard')}
+              accessibilityRole="button"
+              accessibilityLabel="Back to dashboard"
+              style={styles.backButton}
+            >
+              <Ionicons name="chevron-back" size={26} color="#FFFFFF" />
+            </Pressable>
+
             <View style={styles.heroTextBlock}>
               <Text
                 style={[
@@ -509,45 +444,6 @@ export default function BranchScreen() {
         </View>
       </ScrollView>
 
-      {/* Floating Success Notification */}
-      {toastMessage !== null && (
-        <View
-          pointerEvents="none"
-          style={[
-            styles.toastPosition,
-            {
-              top: insets.top + 16,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.toastBox,
-              {
-                backgroundColor:
-                  colors.backgroundElement,
-                borderColor: colors.success,
-              },
-            ]}
-          >
-            <Ionicons
-              name="checkmark-circle"
-              size={24}
-              color={colors.success}
-            />
-
-            <Text
-              style={[
-                styles.toastText,
-                { color: colors.text },
-              ]}
-            >
-              {toastMessage}
-            </Text>
-          </View>
-        </View>
-      )}
-
       {/* Check Out Confirmation Modal */}
       <Modal
         visible={isCheckOutModalVisible}
@@ -708,17 +604,14 @@ const styles = StyleSheet.create({
 
   heroTextBlock: {
     flex: 1,
+  },
+
   backButton: {
     width: 44,
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: -Spacing.two,
-  },
-
-  logo: {
-    width: 65,
-    height: 50,
   },
 
   brand: {
@@ -833,38 +726,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 20,
-  },
-
-  toastPosition: {
-    position: 'absolute',
-    left: Spacing.four,
-    right: Spacing.four,
-    zIndex: 20,
-    elevation: 20,
-  },
-
-  toastBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: Spacing.two,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-
-  toastText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    lineHeight: 19,
   },
 
   // Check Out confirmation popup
