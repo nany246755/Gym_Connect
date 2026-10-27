@@ -3,6 +3,12 @@ import type {
   Conversation,
 } from './types';
 
+import { mockUser } from '@/data/mock-user';
+import { firstName } from '@/logic/dashboard';
+
+// 'member-aj' is the signed-in member from the mock user.
+const me = firstName(mockUser.fullName);
+
 // Member IDs must match
 // src/features/partners/mockMembers.ts
 
@@ -27,7 +33,7 @@ export const mockMessages: ChatMessage[] = [
     conversationId: 'chat-aj-maya',
     senderId: 'member-maya',
     receiverId: 'member-aj',
-    text: 'Hey AJ! Are you training today?',
+    text: `Hey ${me}! Are you training today?`,
     createdAt: '2026-10-25T13:00:00.000Z',
     status: 'read',
   },
@@ -72,7 +78,7 @@ export const mockMessages: ChatMessage[] = [
     conversationId: 'chat-aj-omar',
     senderId: 'member-omar',
     receiverId: 'member-aj',
-    text: 'Thanks AJ! Let us train again soon.',
+    text: `Thanks ${me}! Let us train again soon.`,
     createdAt: '2026-10-24T17:15:00.000Z',
     status: 'sent',
   },

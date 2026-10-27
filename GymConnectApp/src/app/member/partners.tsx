@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MEMBER_TAB_BAR_SPACE } from '@/components/member-tab-bar';
+import { mockUserBranchName } from '@/data/mock-user';
 import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedPartners } from '../../features/partners/PartnersProvider';
@@ -169,7 +171,7 @@ export default function PartnersScreen() {
           <View style={styles.logo}><Text style={styles.logoText}>G</Text></View>
           <Text style={styles.brandName}>GYM CONNECT</Text>
         </View>
-        <View style={styles.branchBadge}><Text style={styles.branchText}>Midtown</Text></View>
+        <View style={styles.branchBadge}><Text style={styles.branchText}>{mockUserBranchName}</Text></View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -191,7 +193,7 @@ export default function PartnersScreen() {
               </View>
               <View style={styles.factGrid}>
                 <View style={styles.fact}><Text style={styles.factLabel}>Preferred schedule</Text><Text style={styles.factValue}>{selectedMember.schedule.preferredTime}</Text></View>
-                <View style={styles.fact}><Text style={styles.factLabel}>Home branch</Text><Text style={styles.factValue}>Midtown</Text></View>
+                <View style={styles.fact}><Text style={styles.factLabel}>Home branch</Text><Text style={styles.factValue}>{mockUserBranchName}</Text></View>
                 <View style={styles.fact}><Text style={styles.factLabel}>Training days</Text><Text style={styles.factValue}>{selectedMember.schedule.days.map(day => day.slice(0, 3)).join(', ')}</Text></View>
                 <View style={styles.fact}><Text style={styles.factLabel}>Fitness level</Text><Text style={styles.factValue}>{selectedMember.fitnessLevel}</Text></View>
               </View>
@@ -257,7 +259,7 @@ export default function PartnersScreen() {
                       <Text style={styles.clearText}>Clear</Text>
                     </Pressable>
                   </View>
-                  <Text style={styles.resultCount}>{matchedMembers.length} members at Midtown</Text>
+                  <Text style={styles.resultCount}>{matchedMembers.length} members at {mockUserBranchName}</Text>
 
                   {matchedMembers.length === 0 && (
                     <View style={styles.empty}><Text style={styles.emptyTitle}>No matching members</Text><Text style={styles.emptyDetail}>Try another training style or schedule.</Text></View>
@@ -426,7 +428,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>) => StyleSheet.create(
   brandName: { color: colors.heroText, fontSize: 13, fontWeight: '800', letterSpacing: 0.7 },
   branchBadge: { borderWidth: 1, borderColor: colors.heroChip, borderRadius: 22, paddingHorizontal: 13, paddingVertical: 8 },
   branchText: { color: colors.heroText, fontSize: 12, fontWeight: '600' },
-  content: { padding: 18, paddingBottom: 50 },
+  content: { padding: 18, paddingBottom: MEMBER_TAB_BAR_SPACE }, // clears the nav bar
   intro: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 15 },
   eyebrow: { color: colors.accentText, fontWeight: '800', fontSize: 11, letterSpacing: 1.6, marginBottom: 11 },
   pageTitle: { color: colors.text, fontSize: 30, fontWeight: '700', letterSpacing: -1 },

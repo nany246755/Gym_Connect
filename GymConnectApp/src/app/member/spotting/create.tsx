@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { mockUserBranchName } from '@/data/mock-user';
 import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedSpottingRequests } from '../../../features/spotting/SpottingRequestsProvider';
@@ -105,7 +106,7 @@ export default function CreateSpotRequestScreen() {
         </Pressable>
 
         <View style={styles.infoPanel}>
-          <Text style={styles.infoTitle}>⌖  Midtown Branch</Text>
+          <Text style={styles.infoTitle}>⌖  {mockUserBranchName} Branch</Text>
           <Text style={styles.infoText}>Only eligible members at this branch can accept your request.</Text>
           <Text style={styles.infoTitle}>◷  Expires after 2 minutes</Text>
           <Text style={styles.infoText}>If nobody accepts, you can create another request.</Text>

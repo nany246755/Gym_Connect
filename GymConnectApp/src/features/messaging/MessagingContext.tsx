@@ -81,7 +81,7 @@ interface MessagingProviderProps {
 // DEMO CONNECTIONS
 // ==========================================
 
-// For now, AJ and Maya are connected.
+// For now, the signed-in member (member-aj) and Maya are connected.
 //
 // Later, we will replace this demo data with
 // the accepted connections from FR07.

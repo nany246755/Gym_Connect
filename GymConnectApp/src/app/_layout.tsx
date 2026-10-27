@@ -5,7 +5,8 @@ import {
   ThemeProvider,
 } from 'expo-router';
 
-import { useColorScheme } from 'react-native';
+// Our hook: stays 'light' until the web page has loaded, so the server and browser match.
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import {
   GymConnectProviders,

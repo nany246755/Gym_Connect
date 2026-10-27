@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
@@ -14,6 +14,10 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useMemberDashboard } from '@/logic/use-member-dashboard';
 import type { ActivityKind } from '@/types/branch-activity';
+
+// The teammate's Equipment Availability screen (src/app/member/equipment/index.tsx). Cast because
+// the route only exists once that screen is merged.
+const EQUIPMENT = '/member/equipment' as Href;
 
 // Member Dashboard: greeting, check-in, equipment availability and live branch activity.
 export default function MemberDashboardScreen() {
@@ -35,7 +39,7 @@ export default function MemberDashboardScreen() {
   const tiles: { label: string; count: number; icon: IconName; fg: string; bg: string }[] = [
     { label: 'Available', count: counts.Available, icon: Icons.available, fg: theme.success, bg: theme.successSoft },
     { label: 'Occupied', count: counts.Occupied, icon: Icons.occupied, fg: theme.danger, bg: theme.dangerSoft },
-    { label: 'Soon', count: counts.AvailableSoon, icon: Icons.soon, fg: theme.accentText, bg: theme.accentSoft },
+    { label: 'Soon', count: counts.AvailableSoon, icon: Icons.soon, fg: theme.accentText, bg: theme.soonSoft },
   ];
 
   const activityIcon: Record<ActivityKind, { icon: IconName; color: string }> = {
@@ -113,8 +117,12 @@ export default function MemberDashboardScreen() {
               <ThemedText type="smallBold" style={[styles.flex, styles.sectionTitle]}>
                 Equipment availability
               </ThemedText>
-              {/* shortcut: UI only until the Equipment Availability screen is merged. */}
-              <Pressable accessibilityRole="button" accessibilityLabel="View all equipment" hitSlop={Spacing.three} style={styles.viewAll}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="View all equipment"
+                hitSlop={Spacing.three}
+                style={styles.viewAll}
+                onPress={() => router.push(EQUIPMENT)}>
                 <ThemedText type="small" themeColor="textSecondary">
                   View all
                 </ThemedText>
@@ -135,8 +143,13 @@ export default function MemberDashboardScreen() {
               ))}
             </View>
             <View style={styles.actions}>
-              {/* shortcut: UI only until the Equipment and Spotting screens are merged. */}
-              <ActionCard icon={Icons.search} title="Find equipment" note="See live availability on the gym floor" />
+              <ActionCard
+                icon={Icons.search}
+                title="Find equipment"
+                note="See live availability on the gym floor"
+                onPress={() => router.push(EQUIPMENT)}
+              />
+              {/* shortcut: UI only, not linked to the Spotting screen yet. */}
               <ActionCard
                 icon={Icons.partners}
                 title="Spot me"
@@ -192,13 +205,26 @@ function Card({ children }: { children: ReactNode }) {
   );
 }
 
-// A shortcut card. No onPress yet: it becomes a link when the target screen is merged.
-function ActionCard({ icon, title, note, locked }: { icon: IconName; title: string; note: string; locked?: boolean }) {
+// A shortcut card. Without onPress it is UI only.
+function ActionCard({
+  icon,
+  title,
+  note,
+  locked,
+  onPress,
+}: {
+  icon: IconName;
+  title: string;
+  note: string;
+  locked?: boolean;
+  onPress?: () => void;
+}) {
   const theme = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${note}`}
+      onPress={onPress}
       style={[styles.card, styles.action, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
       <SymbolView name={icon} size={24} tintColor={theme.danger} />
       <ThemedText type="smallBold" style={styles.cardTitle}>
