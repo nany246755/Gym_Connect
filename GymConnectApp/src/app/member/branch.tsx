@@ -1,10 +1,8 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 import {
   View,
   Text,
-  Image,
   TextInput,
   ScrollView,
   Pressable,
@@ -36,8 +34,6 @@ import type { BranchWithStatus } from '@/types/branch';
 
 export default function BranchScreen() {
   const colors = useTheme();
-
-  // Get the safe area around the iPhone's status bar.
   const insets = useSafeAreaInsets();
 
   const {
@@ -181,7 +177,10 @@ export default function BranchScreen() {
         `Successfully checked in at ${branch.name}`
       );
     } else {
-      Alert.alert('Check-in unavailable', 'Your attendance could not be saved. Please try again.');
+      Alert.alert(
+        'Check-in unavailable',
+        'Your attendance could not be saved. Please try again.'
+      );
     }
   };
 
@@ -213,27 +212,28 @@ export default function BranchScreen() {
     const branchName =
       activeBranch?.name ?? 'your branch';
 
-    // Show loading state
     setIsCheckingOut(true);
 
-    // Demo processing delay
     await new Promise<void>((resolve) => {
       setTimeout(resolve, 1000);
     });
 
-    // Checkout is confirmed only after the attendance state is saved.
-    // The shared timer provider resets the running/paused rest timer.
     const success = await endDemoCheckIn();
 
     setIsCheckingOut(false);
 
     if (!success) {
-      Alert.alert('Check-out unavailable', 'Your check-out could not be saved. Please try again.');
+      Alert.alert(
+        'Check-out unavailable',
+        'Your check-out could not be saved. Please try again.'
+      );
       return;
     }
 
     setIsCheckOutModalVisible(false);
-    showSuccessToast(`Successfully checked out of ${branchName}`);
+    showSuccessToast(
+      `Successfully checked out of ${branchName}`
+    );
   };
 
   const clearSearch = () => {
@@ -253,205 +253,227 @@ export default function BranchScreen() {
         keyboardDismissMode="on-drag"
       >
         {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={require(
-              '../../../assets/images/logo(notext).jpeg'
-            )}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+        <View
+          style={[
+            styles.hero,
+            { backgroundColor: colors.navy },
+          ]}
+        >
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroTextBlock}>
+              <Text
+                style={[
+                  styles.brand,
+                  { color: colors.marigold },
+                ]}
+              >
+                GYM CONNECT
+              </Text>
 
-          <View style={styles.headerText}>
-            <Text
-              style={[
-                styles.title,
-                { color: colors.text },
-              ]}
-            >
-              Gym Connect
-            </Text>
+              <Text style={styles.heroTitle}>
+                Branch Selection
+              </Text>
 
-            <Text
-              style={[
-                styles.subtitle,
-                { color: colors.textSecondary },
-              ]}
+              <Text style={styles.heroSubtitle}>
+                Choose your branch and manage your
+                gym check-in.
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => router.push('/member/profile')}
+              accessibilityRole="button"
+              accessibilityLabel="Open my profile"
+              style={styles.profileIcon}
             >
-              Find your gym branch
-            </Text>
+              <Ionicons
+                name="person-outline"
+                size={22}
+                color="#FFFFFF"
+              />
+            </Pressable>
           </View>
+        </View>
 
-          {/* Profile icon: open teammate's Profile screen. */}
-          <Pressable
-            onPress={() => router.push('/member/profile')}
-            accessibilityRole="button"
-            accessibilityLabel="Open my profile"
+        {/* Main Content */}
+        <View style={styles.content}>
+          {/* Search Bar */}
+          <View
             style={[
-              styles.profileIcon,
+              styles.searchContainer,
               {
                 backgroundColor:
-                  colors.backgroundElement,
+                  colors.backgroundSelected,
+                borderColor: colors.border,
               },
             ]}
           >
             <Ionicons
-              name="person-outline"
-              size={24}
-              color={colors.text}
+              name="search-outline"
+              size={22}
+              color={colors.textSecondary}
             />
-          </Pressable>
-        </View>
 
-        {/* Search Bar */}
-        <View
-          style={[
-            styles.searchContainer,
-            {
-              backgroundColor:
-                colors.backgroundSelected,
-            },
-          ]}
-        >
-          <Ionicons
-            name="search-outline"
-            size={22}
-            color={colors.textSecondary}
-          />
-
-          <TextInput
-            style={[
-              styles.searchInput,
-              { color: colors.text },
-            ]}
-            placeholder="Search branches..."
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-
-          {searchQuery.length > 0 && (
-            <Pressable
-              onPress={clearSearch}
-              accessibilityRole="button"
-              accessibilityLabel="Clear branch search"
-              hitSlop={10}
-            >
-              <Ionicons
-                name="close-circle"
-                size={22}
-                color={colors.textSecondary}
-              />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Available Branches */}
-        <View style={styles.branchSection}>
-          <View style={styles.sectionHeader}>
-            <Text
+            <TextInput
               style={[
-                styles.sectionTitle,
+                styles.searchInput,
                 { color: colors.text },
               ]}
-            >
-              Available Branches
-            </Text>
+              placeholder="Search branches..."
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCorrect={false}
+              returnKeyType="search"
+            />
 
-            <Text
-              style={[
-                styles.branchCount,
-                { color: colors.textSecondary },
-              ]}
-            >
-              {filteredBranches.length}{' '}
-              {filteredBranches.length === 1
-                ? 'branch'
-                : 'branches'}
-            </Text>
+            {searchQuery.length > 0 && (
+              <Pressable
+                onPress={clearSearch}
+                accessibilityRole="button"
+                accessibilityLabel="Clear branch search"
+                hitSlop={10}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={22}
+                  color={colors.textSecondary}
+                />
+              </Pressable>
+            )}
           </View>
 
-          {/* Branch Cards */}
-          {filteredBranches.length > 0 ? (
-            filteredBranches.map((branch) => (
-              <BranchCard
-                key={branch.id}
-                branch={branch}
-                isSelected={
-                  selectedBranchId === branch.id
-                }
-                onPress={() =>
-                  handleBranchPress(branch.id)
-                }
-                onCheckIn={handleDemoCheckIn}
-                onCheckOut={handleRequestCheckOut}
-                activeCheckInBranchId={
-                  activeCheckIn?.branchId ?? null
-                }
-                checkedInAt={
-                  activeCheckIn?.branchId === branch.id
-                    ? activeCheckIn.checkedInAt
-                    : null
-                }
-              />
-            ))
-          ) : (
+          {/* Available Branches */}
+          <View style={styles.branchSection}>
+            <View style={styles.sectionHeader}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: colors.text },
+                ]}
+              >
+                Available Branches
+              </Text>
+
+              <Text
+                style={[
+                  styles.branchCount,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {filteredBranches.length}{' '}
+                {filteredBranches.length === 1
+                  ? 'branch'
+                  : 'branches'}
+              </Text>
+            </View>
+
+            {filteredBranches.length > 0 ? (
+              filteredBranches.map((branch) => (
+                <BranchCard
+                  key={branch.id}
+                  branch={branch}
+                  isSelected={
+                    selectedBranchId === branch.id
+                  }
+                  onPress={() =>
+                    handleBranchPress(branch.id)
+                  }
+                  onCheckIn={handleDemoCheckIn}
+                  onCheckOut={handleRequestCheckOut}
+                  activeCheckInBranchId={
+                    activeCheckIn?.branchId ?? null
+                  }
+                  checkedInAt={
+                    activeCheckIn?.branchId === branch.id
+                      ? activeCheckIn.checkedInAt
+                      : null
+                  }
+                />
+              ))
+            ) : (
+              <View
+                style={[
+                  styles.emptyState,
+                  {
+                    backgroundColor:
+                      colors.backgroundElement,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="search-outline"
+                  size={32}
+                  color={colors.textSecondary}
+                />
+
+                <Text
+                  style={[
+                    styles.emptyTitle,
+                    { color: colors.text },
+                  ]}
+                >
+                  No matching branches
+                </Text>
+
+                <Text
+                  style={[
+                    styles.emptyDescription,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  Try searching for another branch
+                  name or location.
+                </Text>
+
+                <Pressable
+                  onPress={clearSearch}
+                  accessibilityRole="button"
+                >
+                  <Text
+                    style={[
+                      styles.clearText,
+                      { color: colors.marigold },
+                    ]}
+                  >
+                    Clear search
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* Reminder Message */}
             <View
               style={[
-                styles.emptyState,
+                styles.reminderCard,
                 {
                   backgroundColor:
                     colors.backgroundElement,
+                  borderColor: colors.border,
                 },
               ]}
             >
               <Ionicons
-                name="search-outline"
-                size={32}
+                name="information-circle-outline"
+                size={24}
                 color={colors.textSecondary}
               />
 
               <Text
                 style={[
-                  styles.emptyTitle,
-                  { color: colors.text },
-                ]}
-              >
-                No matching branches
-              </Text>
-
-              <Text
-                style={[
-                  styles.emptyDescription,
+                  styles.reminderText,
                   { color: colors.textSecondary },
                 ]}
               >
-                Try searching for another branch
-                name or location.
+                Don&apos;t forget to check out when
+                leaving the gym.
               </Text>
-
-              <Pressable
-                onPress={clearSearch}
-                accessibilityRole="button"
-              >
-                <Text
-                  style={[
-                    styles.clearText,
-                    { color: colors.marigold },
-                  ]}
-                >
-                  Clear search
-                </Text>
-              </Pressable>
             </View>
-          )}
+          </View>
         </View>
       </ScrollView>
 
       {/* Floating Success Notification */}
-      {/* FIXED: Positioned below the phone's status bar */}
       {toastMessage !== null && (
         <View
           pointerEvents="none"
@@ -507,7 +529,6 @@ export default function BranchScreen() {
               },
             ]}
           >
-            {/* Icon */}
             <View
               style={[
                 styles.modalIcon,
@@ -524,7 +545,6 @@ export default function BranchScreen() {
               />
             </View>
 
-            {/* Title */}
             <Text
               style={[
                 styles.modalTitle,
@@ -534,7 +554,6 @@ export default function BranchScreen() {
               Confirm Check Out
             </Text>
 
-            {/* Description */}
             <Text
               style={[
                 styles.modalDescription,
@@ -549,7 +568,6 @@ export default function BranchScreen() {
                   }?`}
             </Text>
 
-            {/* Action buttons */}
             <View style={styles.modalActions}>
               {!isCheckingOut && (
                 <Pressable
@@ -634,35 +652,47 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
     paddingBottom: Spacing.five,
   },
 
-  header: {
+  hero: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.five,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+  },
+
+  heroTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.four,
-    gap: Spacing.two,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.three,
   },
 
-  logo: {
-    width: 65,
-    height: 50,
-  },
-
-  headerText: {
+  heroTextBlock: {
     flex: 1,
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  brand: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 3,
+    marginBottom: Spacing.three,
   },
 
-  subtitle: {
-    fontSize: 12,
-    marginTop: Spacing.one,
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: Spacing.two,
+  },
+
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#C9D1DD',
+    maxWidth: '90%',
   },
 
   profileIcon: {
@@ -671,15 +701,24 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.20)',
+  },
+
+  content: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.four,
   },
 
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: Spacing.three,
     height: 52,
     gap: Spacing.two,
+    borderWidth: 1,
   },
 
   searchInput: {
@@ -733,13 +772,24 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
 
-  // Floating toast notification
+  reminderCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: Spacing.three,
+    marginTop: Spacing.one,
+  },
+
+  reminderText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+
   toastPosition: {
     position: 'absolute',
-
-    // The top position is calculated using
-    // useSafeAreaInsets() in the JSX above.
-
     left: Spacing.four,
     right: Spacing.four,
     zIndex: 20,
@@ -770,7 +820,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // Check Out confirmation popup
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
