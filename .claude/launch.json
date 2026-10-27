@@ -4,7 +4,7 @@
     {
       "name": "expo-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "GymConnectApp", "run", "web", "--", "--port", "8081"],
+      "runtimeArgs": ["--prefix", "GymConnectApp", "run", "web", "--", "--port", "8081", "--clear"],
       "port": 8081
     }
   ]

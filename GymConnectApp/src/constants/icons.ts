@@ -23,6 +23,12 @@ export const Icons = {
   profile: { ios: 'person.crop.circle', android: 'person', web: 'person' },
   next: { ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' },
   close: { ios: 'xmark', android: 'close', web: 'close' },
+  home: { ios: 'house', android: 'home', web: 'home' },
+  partners: { ios: 'person.2', android: 'group', web: 'group' },
+  available: { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' },
+  occupied: { ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' },
+  soon: { ios: 'clock.fill', android: 'schedule', web: 'schedule' },
+  checkIn: { ios: 'arrow.down.circle.fill', android: 'login', web: 'login' },
 } satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = SymbolViewProps['name'];

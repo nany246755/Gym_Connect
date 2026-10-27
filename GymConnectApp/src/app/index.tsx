@@ -43,6 +43,12 @@ type ScreenItem = {
 
 const SCREENS: ScreenItem[] = [
   {
+    title: 'Member Dashboard',
+    route: '/member/dashboard',
+    owner: 'Member 3 - Andro',
+    icon: 'home-outline',
+  },
+  {
     title: 'Branch Selection & Check In',
     route: '/member/branch',
     owner: 'Branch Selection',

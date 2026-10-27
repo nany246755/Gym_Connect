@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   View,
@@ -15,10 +15,7 @@ import {
   Alert,
 } from 'react-native';
 
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -36,9 +33,6 @@ import type { BranchWithStatus } from '@/types/branch';
 
 export default function BranchScreen() {
   const colors = useTheme();
-
-  // Get the safe area around the iPhone's status bar.
-  const insets = useSafeAreaInsets();
 
   const {
     activeCheckIn,
@@ -65,37 +59,6 @@ export default function BranchScreen() {
 
   const [isCheckingOut, setIsCheckingOut] =
     useState(false);
-
-  // Temporary success notification
-  const [toastMessage, setToastMessage] =
-    useState<string | null>(null);
-
-  const toastTimer = useRef<
-    ReturnType<typeof setTimeout> | null
-  >(null);
-
-  // Display success notification for 3 seconds
-  const showSuccessToast = (message: string) => {
-    if (toastTimer.current !== null) {
-      clearTimeout(toastTimer.current);
-    }
-
-    setToastMessage(message);
-
-    toastTimer.current = setTimeout(() => {
-      setToastMessage(null);
-      toastTimer.current = null;
-    }, 3000);
-  };
-
-  // Clean up notification timer
-  useEffect(() => {
-    return () => {
-      if (toastTimer.current !== null) {
-        clearTimeout(toastTimer.current);
-      }
-    };
-  }, []);
 
   // Refresh branch availability
   useEffect(() => {
@@ -177,9 +140,8 @@ export default function BranchScreen() {
     const success = await startDemoCheckIn(branchId);
 
     if (success) {
-      showSuccessToast(
-        `Successfully checked in at ${branch.name}`
-      );
+      // Back to the dashboard, which now shows this branch as checked in.
+      router.dismissTo('/member/dashboard');
     } else {
       Alert.alert('Check-in unavailable', 'Your attendance could not be saved. Please try again.');
     }
@@ -210,9 +172,6 @@ export default function BranchScreen() {
       return;
     }
 
-    const branchName =
-      activeBranch?.name ?? 'your branch';
-
     // Show loading state
     setIsCheckingOut(true);
 
@@ -233,7 +192,9 @@ export default function BranchScreen() {
     }
 
     setIsCheckOutModalVisible(false);
-    showSuccessToast(`Successfully checked out of ${branchName}`);
+
+    // Back to the dashboard, which now shows "not checked in".
+    router.dismissTo('/member/dashboard');
   };
 
   const clearSearch = () => {
@@ -254,6 +215,20 @@ export default function BranchScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
+          {/* Back arrow: return to the dashboard without changing the check-in. */}
+          <Pressable
+            onPress={() => router.dismissTo('/member/dashboard')}
+            accessibilityRole="button"
+            accessibilityLabel="Back to dashboard"
+            style={styles.backButton}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={colors.text}
+            />
+          </Pressable>
+
           <Image
             source={require(
               '../../../assets/images/logo(notext).jpeg'
@@ -450,46 +425,6 @@ export default function BranchScreen() {
         </View>
       </ScrollView>
 
-      {/* Floating Success Notification */}
-      {/* FIXED: Positioned below the phone's status bar */}
-      {toastMessage !== null && (
-        <View
-          pointerEvents="none"
-          style={[
-            styles.toastPosition,
-            {
-              top: insets.top + 16,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.toastBox,
-              {
-                backgroundColor:
-                  colors.backgroundElement,
-                borderColor: colors.success,
-              },
-            ]}
-          >
-            <Ionicons
-              name="checkmark-circle"
-              size={24}
-              color={colors.success}
-            />
-
-            <Text
-              style={[
-                styles.toastText,
-                { color: colors.text },
-              ]}
-            >
-              {toastMessage}
-            </Text>
-          </View>
-        </View>
-      )}
-
       {/* Check Out Confirmation Modal */}
       <Modal
         visible={isCheckOutModalVisible}
@@ -646,6 +581,14 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
 
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -Spacing.two,
+  },
+
   logo: {
     width: 65,
     height: 50,
@@ -731,43 +674,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginTop: Spacing.two,
-  },
-
-  // Floating toast notification
-  toastPosition: {
-    position: 'absolute',
-
-    // The top position is calculated using
-    // useSafeAreaInsets() in the JSX above.
-
-    left: Spacing.four,
-    right: Spacing.four,
-    zIndex: 20,
-    elevation: 20,
-  },
-
-  toastBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.three,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: Spacing.two,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-
-  toastText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    lineHeight: 19,
   },
 
   // Check Out confirmation popup

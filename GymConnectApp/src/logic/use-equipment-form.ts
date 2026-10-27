@@ -1,6 +1,7 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 
-import { commonZones, validateEquipment, withStatus } from '@/logic/equipment';
+import { commonZones, equipmentImage, validateEquipment, withStatus } from '@/logic/equipment';
 import { getBranches } from '@/services/branch-service';
 import { getEquipment, saveEquipment } from '@/services/equipment-service';
 import type { Branch } from '@/types/branch';
@@ -60,6 +61,9 @@ export function useEquipmentForm(id?: string, branchId?: string) {
       branches,
       branchIds,
       zones: commonZones(branches, branchIds),
+      // What the photo box shows: the admin's photo, else the bundled one for this name, else nothing.
+      image: item ? equipmentImage(item) : undefined,
+      hasOwnPhoto: !!item?.imageUrl,
       isNew: !id,
       saving,
       errors: showErrors ? errors : {},
@@ -83,6 +87,22 @@ export function useEquipmentForm(id?: string, branchId?: string) {
       chooseBranches(branchIds.length === branches.length ? [branches[0].id] : branches.map((b) => b.id)),
     setMuscleGroup: (muscleGroup: MuscleGroup) => edit((e) => ({ ...e, muscleGroup })),
     setStatus: (status: EquipmentStatus) => edit((e) => withStatus(e, status, new Date())),
+    // shortcut: keeps the photo's on-device address, so it only shows on this phone. With Firebase,
+    // the service uploads it to Storage on save and stores the download URL instead.
+    pickPhoto: async () => {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets[0]) {
+        const imageUrl = result.assets[0].uri;
+        edit((e) => ({ ...e, imageUrl }));
+      }
+    },
+    // Back to the bundled photo for this machine type, or the icon.
+    removePhoto: () => edit((e) => ({ ...e, imageUrl: undefined })),
     // Resolves true when saved, so the screen can go back.
     save: async (): Promise<boolean> => {
       setShowErrors(true);

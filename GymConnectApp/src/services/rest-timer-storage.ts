@@ -1,15 +1,13 @@
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import type { RestTimerState } from '@/types/rest-timer';
 
-const KEY = 'restTimer';
+// shortcut: UI phase has no storage, so the timer is kept in memory only. It survives leaving the
+// timer screen, and starts fresh when the app is reopened.
+let saved: RestTimerState | null = null;
 
 export async function loadRestTimer(): Promise<RestTimerState | null> {
-  const raw = await AsyncStorage.getItem(KEY);
-  return raw ? (JSON.parse(raw) as RestTimerState) : null;
+  return saved;
 }
 
 export async function saveRestTimer(state: RestTimerState): Promise<void> {
-  await AsyncStorage.setItem(KEY, JSON.stringify(state));
+  saved = state;
 }
