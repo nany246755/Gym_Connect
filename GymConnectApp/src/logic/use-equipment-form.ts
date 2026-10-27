@@ -1,59 +1,260 @@
-import * as ImagePicker from 'expo-image-picker';
+
 import { useEffect, useState } from 'react';
 
-import { commonZones, equipmentImage, validateEquipment, withStatus } from '@/logic/equipment';
-import { getBranches } from '@/services/branch-service';
-import { getEquipment, saveEquipment } from '@/services/equipment-service';
-import type { Branch } from '@/types/branch';
-import type { Equipment, EquipmentStatus, MuscleGroup } from '@/types/equipment';
+import {
+  commonZones,
+  validateEquipment,
+  withStatus,
+} from '@/logic/equipment';
 
-// ViewModel for Admin Equipment Management — add / edit form (FR-10). No `id` means "add".
-// Adding can target several branches at once: each one gets its own copy (equipment lives inside a
-// branch, with its own status). Editing always changes one branch's machine.
-export function useEquipmentForm(id?: string, branchId?: string) {
+import { getBranches } from '@/services/branch-service';
+
+import {
+  getEquipment,
+  listEquipment,
+  saveEquipment,
+} from '@/services/equipment-service';
+
+import type { Branch } from '@/types/branch';
+
+import type {
+  Equipment,
+  EquipmentFloorPlacement,
+  EquipmentStatus,
+  MuscleGroup,
+} from '@/types/equipment';
+
+// Admin Equipment Management ViewModel.
+// Handles adding, editing, validation and floor positions.
+
+const FLOOR_COLUMNS = 4;
+const MAX_FLOOR_ROWS = 24;
+const MAX_ROW_SPAN = 6;
+
+// Check whether two floor rectangles overlap.
+function positionsOverlap(
+  a: EquipmentFloorPlacement,
+  b: EquipmentFloorPlacement
+): boolean {
+  const aRowSpan = a.rowSpan ?? 1;
+  const aColumnSpan = a.columnSpan ?? 1;
+
+  const bRowSpan = b.rowSpan ?? 1;
+  const bColumnSpan = b.columnSpan ?? 1;
+
+  const rowsOverlap =
+    a.row < b.row + bRowSpan &&
+    a.row + aRowSpan > b.row;
+
+  const columnsOverlap =
+    a.column < b.column + bColumnSpan &&
+    a.column + aColumnSpan > b.column;
+
+  return rowsOverlap && columnsOverlap;
+}
+
+// Validate the position against our four-column floor.
+function isValidFloorPlacement(
+  position: EquipmentFloorPlacement
+): boolean {
+  const rowSpan = position.rowSpan ?? 1;
+  const columnSpan = position.columnSpan ?? 1;
+
+  return (
+    Number.isInteger(position.row) &&
+    Number.isInteger(position.column) &&
+    Number.isInteger(rowSpan) &&
+    Number.isInteger(columnSpan) &&
+    position.row >= 1 &&
+    position.column >= 1 &&
+    rowSpan >= 1 &&
+    columnSpan >= 1 &&
+    rowSpan <= MAX_ROW_SPAN &&
+    position.row + rowSpan - 1 <= MAX_FLOOR_ROWS &&
+    position.column + columnSpan - 1 <= FLOOR_COLUMNS
+  );
+}
+
+export function useEquipmentForm(
+  id?: string,
+  branchId?: string
+) {
   const [item, setItem] = useState<Equipment | null>(null);
+
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchIds, setBranchIds] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
   const [showErrors, setShowErrors] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load the branches and existing equipment.
   useEffect(() => {
-    Promise.all([getBranches(), id ? getEquipment(id) : Promise.resolve(undefined)])
+    let active = true;
+
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      getBranches(),
+      id
+        ? getEquipment(id)
+        : Promise.resolve(undefined),
+    ])
       .then(([list, existing]) => {
+        if (!active) return;
+
         setBranches(list);
-        if (id && !existing) return setError('This equipment no longer exists.');
-        const branch = list.find((b) => b.id === branchId) ?? list[0];
-        setBranchIds([existing?.branchId ?? branch.id]);
+
+        if (id && !existing) {
+          setError('This equipment no longer exists.');
+          return;
+        }
+
+        const branch =
+          list.find((b) => b.id === branchId) ??
+          list[0];
+
+        if (!branch) {
+          setError('No branches are available.');
+          return;
+        }
+
+        setBranchIds([
+          existing?.branchId ?? branch.id,
+        ]);
+
         setItem(
           existing ?? {
             id: `eq-${Date.now()}`,
             branchId: branch.id,
             name: '',
-            zone: branch.zones[0],
+            zone: branch.zones[0] ?? '',
             station: '',
             muscleGroup: 'Chest',
             units: 1,
             status: 'Available',
-          },
+          }
         );
       })
-      .catch(() => setError('Could not load the equipment.'))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (active) {
+          setError('Could not load the equipment.');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, [id, branchId]);
 
-  const edit = (change: (e: Equipment) => Equipment) => setItem((e) => (e ? change(e) : e));
+  // Update one equipment record in form state.
+  const edit = (
+    change: (equipment: Equipment) => Equipment
+  ) => {
+    setItem((current) =>
+      current ? change(current) : current
+    );
+  };
 
-  // Keeps branch order stable and the zone valid: if a ticked branch lacks the zone, use the first shared one.
+  // Maintain valid branch ordering and zones.
   const chooseBranches = (ids: string[]) => {
     if (ids.length === 0) return;
-    const ordered = branches.map((b) => b.id).filter((b) => ids.includes(b));
+
+    const ordered = branches
+      .map((branch) => branch.id)
+      .filter((id) => ids.includes(id));
+
     const zones = commonZones(branches, ordered);
+
     setBranchIds(ordered);
-    edit((e) => ({ ...e, branchId: ordered[0], zone: zones.includes(e.zone) ? e.zone : zones[0] }));
+
+    edit((equipment) => ({
+      ...equipment,
+      branchId: ordered[0],
+      zone: zones.includes(equipment.zone)
+        ? equipment.zone
+        : zones[0] ?? '',
+    }));
   };
-  const errors = item ? validateEquipment(item) : {};
+
+  // NEW: Turn floor positioning on or off.
+  // Turning it off removes the optional placement.
+  const setFloorPlacementEnabled = (enabled: boolean) => {
+    edit((equipment) => ({
+      ...equipment,
+      floorPlacement: enabled
+        ? equipment.floorPlacement ?? {
+            row: 1,
+            column: 1,
+            rowSpan: 1,
+            columnSpan: 1,
+          }
+        : undefined,
+    }));
+  };
+
+  // NEW: Update a numerical floor-position field.
+  // Keep positions within our supported floor dimensions.
+  const setFloorPlacementField = (
+    field: keyof EquipmentFloorPlacement,
+    value: number
+  ) => {
+    if (!Number.isFinite(value)) return;
+
+    edit((equipment) => {
+      if (!equipment.floorPlacement) {
+        return equipment;
+      }
+
+      const current = equipment.floorPlacement;
+
+      const next: EquipmentFloorPlacement = {
+        ...current,
+        [field]: Math.trunc(value),
+      };
+
+      const rowSpan = Math.max(
+        1,
+        Math.min(MAX_ROW_SPAN, next.rowSpan ?? 1)
+      );
+
+      const columnSpan = Math.max(
+        1,
+        Math.min(FLOOR_COLUMNS, next.columnSpan ?? 1)
+      );
+
+      next.rowSpan = rowSpan;
+      next.columnSpan = columnSpan;
+
+      // Keep the starting coordinates inside the floor.
+      next.row = Math.max(
+        1,
+        Math.min(MAX_FLOOR_ROWS - rowSpan + 1, next.row)
+      );
+
+      next.column = Math.max(
+        1,
+        Math.min(FLOOR_COLUMNS - columnSpan + 1, next.column)
+      );
+
+      return {
+        ...equipment,
+        floorPlacement: next,
+      };
+    });
+  };
+
+  const errors = item
+    ? validateEquipment(item)
+    : {};
 
   return {
     data: {
@@ -68,52 +269,153 @@ export function useEquipmentForm(id?: string, branchId?: string) {
       saving,
       errors: showErrors ? errors : {},
     },
+
     loading,
     error,
-    setName: (name: string) => edit((e) => ({ ...e, name })),
-    setStation: (station: string) => edit((e) => ({ ...e, station })),
-    setZone: (zone: string) => edit((e) => ({ ...e, zone })),
-    // Add: tick / untick a branch (at least one stays). Edit: switch to that branch.
+
+    // Existing equipment editing.
+    setName: (name: string) =>
+      edit((equipment) => ({
+        ...equipment,
+        name,
+      })),
+
+    setStation: (station: string) =>
+      edit((equipment) => ({
+        ...equipment,
+        station,
+      })),
+
+    setZone: (zone: string) =>
+      edit((equipment) => ({
+        ...equipment,
+        zone,
+      })),
+
+    // Existing branch-selection behavior.
     toggleBranch: (toggled: string) =>
       chooseBranches(
         !id && branchIds.includes(toggled)
-          ? branchIds.filter((b) => b !== toggled)
+          ? branchIds.filter(
+              (branch) => branch !== toggled
+            )
           : id
             ? [toggled]
-            : [...branchIds, toggled],
+            : [...branchIds, toggled]
       ),
-    // Add only: every branch, or back to just the first one when all are already ticked.
+
     toggleAllBranches: () =>
-      chooseBranches(branchIds.length === branches.length ? [branches[0].id] : branches.map((b) => b.id)),
-    setMuscleGroup: (muscleGroup: MuscleGroup) => edit((e) => ({ ...e, muscleGroup })),
-    setStatus: (status: EquipmentStatus) => edit((e) => withStatus(e, status, new Date())),
-    // shortcut: keeps the photo's on-device address, so it only shows on this phone. With Firebase,
-    // the service uploads it to Storage on save and stores the download URL instead.
-    pickPhoto: async () => {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.7,
-      });
-      if (!result.canceled && result.assets[0]) {
-        const imageUrl = result.assets[0].uri;
-        edit((e) => ({ ...e, imageUrl }));
-      }
-    },
-    // Back to the bundled photo for this machine type, or the icon.
-    removePhoto: () => edit((e) => ({ ...e, imageUrl: undefined })),
-    // Resolves true when saved, so the screen can go back.
+      chooseBranches(
+        branchIds.length === branches.length
+          ? [branches[0].id]
+          : branches.map((branch) => branch.id)
+      ),
+
+    setMuscleGroup: (muscleGroup: MuscleGroup) =>
+      edit((equipment) => ({
+        ...equipment,
+        muscleGroup,
+      })),
+
+    setStatus: (status: EquipmentStatus) =>
+      edit((equipment) =>
+        withStatus(equipment, status, new Date())
+      ),
+
+    // NEW: Floor-positioning actions for the Admin UI.
+    setFloorPlacementEnabled,
+    setFloorPlacementField,
+
+    // Save equipment and its optional floor position.
     save: async (): Promise<boolean> => {
       setShowErrors(true);
-      if (!item || Object.keys(errors).length > 0) return false;
+      setError(null);
+
+      if (!item || Object.keys(errors).length > 0) {
+        return false;
+      }
+
+      if (branchIds.length === 0) {
+        setError('Choose at least one branch.');
+        return false;
+      }
+
+      const placement = item.floorPlacement;
+
+      // Validate floor dimensions.
+      if (
+        placement &&
+        !isValidFloorPlacement(placement)
+      ) {
+        setError(
+          'Invalid floor position. Check the row, column and tile size.'
+        );
+        return false;
+      }
+
       setSaving(true);
+
       try {
-        const clean = { ...item, name: item.name.trim(), station: item.station.trim() };
-        // One at a time: each save reads and rewrites the stored list.
-        for (const b of id ? [item.branchId] : branchIds) {
-          await saveEquipment(id ? clean : { ...clean, id: `${item.id}-${b}`, branchId: b });
+        // Determine which branch records will be saved.
+        const targetBranches = id
+          ? [item.branchId]
+          : branchIds;
+
+        // NEW: Check all branch layouts BEFORE saving.
+        // This avoids partially saving a multi-branch form
+        // if a placement conflicts with existing equipment.
+        if (placement) {
+          for (const targetBranchId of targetBranches) {
+            const existingEquipment =
+              await listEquipment(targetBranchId);
+
+            const targetEquipmentId = id
+              ? item.id
+              : `${item.id}-${targetBranchId}`;
+
+            const conflict = existingEquipment.find(
+              (other) =>
+                other.id !== targetEquipmentId &&
+                other.floorPlacement !== undefined &&
+                positionsOverlap(
+                  placement,
+                  other.floorPlacement
+                )
+            );
+
+            if (conflict) {
+              const branch = branches.find(
+                (b) => b.id === targetBranchId
+              );
+
+              setError(
+                `Floor position overlaps with ${conflict.name} at ${branch?.name ?? 'the selected branch'}.`
+              );
+
+              return false;
+            }
+          }
         }
+
+        const clean = {
+          ...item,
+          name: item.name.trim(),
+          station: item.station.trim(),
+        };
+
+        // Preserve existing sequential multi-branch saving.
+        for (const targetBranchId of targetBranches) {
+          await saveEquipment(
+            id
+              ? clean
+              : {
+                  ...clean,
+                  id: `${item.id}-${targetBranchId}`,
+                  branchId: targetBranchId,
+                }
+          );
+        }
+
         return true;
       } catch {
         setError('Could not save. Try again.');

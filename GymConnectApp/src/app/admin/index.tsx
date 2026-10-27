@@ -1,3 +1,4 @@
+
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -70,21 +71,31 @@ export default function EquipmentInventoryScreen() {
 
       <View style={styles.inner}>
         <View style={[styles.card, styles.overview, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-          <View style={styles.row}>
-            <ThemedText type="small" themeColor="textSecondary" style={[styles.flex, styles.caps]}>
+          <View style={[styles.row, styles.overviewHeader]}>
+            <ThemedText
+              type="small"
+              themeColor="textSecondary"
+              style={[styles.flex, styles.caps, styles.overviewHeading]}
+              numberOfLines={1}>
               {branch?.name} overview
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
+            <ThemedText type="small" themeColor="textSecondary" style={styles.overviewCount} numberOfLines={1}>
               {data.total} items
             </ThemedText>
           </View>
-          <View style={styles.row}>
+          <View style={styles.statsRow}>
             {EQUIPMENT_STATUSES.map((s) => (
               <View key={s} style={styles.stat}>
-                <ThemedText type="subtitle" style={[styles.statValue, { color: theme.textSecondary }]}>
+                <ThemedText type="subtitle" style={[styles.statValue, { color: theme.textSecondary }]} numberOfLines={1}>
                   {data.counts[s]}
                 </ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
+                <ThemedText
+                  type="small"
+                  themeColor="textSecondary"
+                  style={styles.statLabel}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}>
                   {STATUS_LABEL[s]}
                 </ThemedText>
               </View>
@@ -350,9 +361,14 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
   },
   card: { borderWidth: 1, borderRadius: Spacing.three, padding: Spacing.three },
-  overview: { marginTop: -Spacing.five, gap: Spacing.two, marginBottom: Spacing.three },
-  stat: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 24, lineHeight: 30 },
+  overview: { marginTop: -Spacing.five, gap: Spacing.two, marginBottom: Spacing.three, zIndex: 1 },
+  overviewHeader: { justifyContent: 'space-between' },
+  overviewHeading: { minWidth: 0 },
+  overviewCount: { flexShrink: 0, textAlign: 'right' },
+  statsRow: { flexDirection: 'row', alignItems: 'flex-start', width: '100%' },
+  stat: { flex: 1, minWidth: 0, alignItems: 'center' },
+  statValue: { fontSize: 24, lineHeight: 30, textAlign: 'center' },
+  statLabel: { width: '100%', textAlign: 'center', fontSize: 11, lineHeight: 16, includeFontPadding: false },
   search: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,10 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 
 import { useEffect, useState } from 'react';
 
 import {
   View,
   Text,
-  Image,
   TextInput,
   ScrollView,
   Pressable,
@@ -33,6 +33,7 @@ import type { BranchWithStatus } from '@/types/branch';
 
 export default function BranchScreen() {
   const colors = useTheme();
+  const insets = useSafeAreaInsets();
 
   const {
     activeCheckIn,
@@ -143,7 +144,10 @@ export default function BranchScreen() {
       // Back to the dashboard, which now shows this branch as checked in.
       router.dismissTo('/member/dashboard');
     } else {
-      Alert.alert('Check-in unavailable', 'Your attendance could not be saved. Please try again.');
+      Alert.alert(
+        'Check-in unavailable',
+        'Your attendance could not be saved. Please try again.'
+      );
     }
   };
 
@@ -172,26 +176,32 @@ export default function BranchScreen() {
       return;
     }
 
+    const branchName =
+      activeBranch?.name ?? 'your branch';
+
     // Show loading state
     setIsCheckingOut(true);
 
-    // Demo processing delay
     await new Promise<void>((resolve) => {
       setTimeout(resolve, 1000);
     });
 
-    // Checkout is confirmed only after the attendance state is saved.
-    // The shared timer provider resets the running/paused rest timer.
     const success = await endDemoCheckIn();
 
     setIsCheckingOut(false);
 
     if (!success) {
-      Alert.alert('Check-out unavailable', 'Your check-out could not be saved. Please try again.');
+      Alert.alert(
+        'Check-out unavailable',
+        'Your check-out could not be saved. Please try again.'
+      );
       return;
     }
 
     setIsCheckOutModalVisible(false);
+    showSuccessToast(
+      `Successfully checked out of ${branchName}`
+    );
 
     // Back to the dashboard, which now shows "not checked in".
     router.dismissTo('/member/dashboard');
@@ -281,149 +291,262 @@ export default function BranchScreen() {
         {/* Search Bar */}
         <View
           style={[
-            styles.searchContainer,
-            {
-              backgroundColor:
-                colors.backgroundSelected,
-            },
+            styles.hero,
+            { backgroundColor: colors.navy },
           ]}
         >
-          <Ionicons
-            name="search-outline"
-            size={22}
-            color={colors.textSecondary}
-          />
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroTextBlock}>
+              <Text
+                style={[
+                  styles.brand,
+                  { color: colors.marigold },
+                ]}
+              >
+                GYM CONNECT
+              </Text>
 
-          <TextInput
-            style={[
-              styles.searchInput,
-              { color: colors.text },
-            ]}
-            placeholder="Search branches..."
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCorrect={false}
-            returnKeyType="search"
-          />
+              <Text style={styles.heroTitle}>
+                Branch Selection
+              </Text>
 
-          {searchQuery.length > 0 && (
+              <Text style={styles.heroSubtitle}>
+                Choose your branch and manage your
+                gym check-in.
+              </Text>
+            </View>
+
             <Pressable
-              onPress={clearSearch}
+              onPress={() => router.push('/member/profile')}
               accessibilityRole="button"
-              accessibilityLabel="Clear branch search"
-              hitSlop={10}
+              accessibilityLabel="Open my profile"
+              style={styles.profileIcon}
             >
               <Ionicons
-                name="close-circle"
+                name="person-outline"
                 size={22}
-                color={colors.textSecondary}
+                color="#FFFFFF"
               />
             </Pressable>
-          )}
+          </View>
         </View>
 
-        {/* Available Branches */}
-        <View style={styles.branchSection}>
-          <View style={styles.sectionHeader}>
-            <Text
+        {/* Main Content */}
+        <View style={styles.content}>
+          {/* Search Bar */}
+          <View
+            style={[
+              styles.searchContainer,
+              {
+                backgroundColor:
+                  colors.backgroundSelected,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Ionicons
+              name="search-outline"
+              size={22}
+              color={colors.textSecondary}
+            />
+
+            <TextInput
               style={[
-                styles.sectionTitle,
+                styles.searchInput,
                 { color: colors.text },
               ]}
-            >
-              Available Branches
-            </Text>
+              placeholder="Search branches..."
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCorrect={false}
+              returnKeyType="search"
+            />
 
-            <Text
-              style={[
-                styles.branchCount,
-                { color: colors.textSecondary },
-              ]}
-            >
-              {filteredBranches.length}{' '}
-              {filteredBranches.length === 1
-                ? 'branch'
-                : 'branches'}
-            </Text>
+            {searchQuery.length > 0 && (
+              <Pressable
+                onPress={clearSearch}
+                accessibilityRole="button"
+                accessibilityLabel="Clear branch search"
+                hitSlop={10}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={22}
+                  color={colors.textSecondary}
+                />
+              </Pressable>
+            )}
           </View>
 
-          {/* Branch Cards */}
-          {filteredBranches.length > 0 ? (
-            filteredBranches.map((branch) => (
-              <BranchCard
-                key={branch.id}
-                branch={branch}
-                isSelected={
-                  selectedBranchId === branch.id
-                }
-                onPress={() =>
-                  handleBranchPress(branch.id)
-                }
-                onCheckIn={handleDemoCheckIn}
-                onCheckOut={handleRequestCheckOut}
-                activeCheckInBranchId={
-                  activeCheckIn?.branchId ?? null
-                }
-                checkedInAt={
-                  activeCheckIn?.branchId === branch.id
-                    ? activeCheckIn.checkedInAt
-                    : null
-                }
-              />
-            ))
-          ) : (
+          {/* Available Branches */}
+          <View style={styles.branchSection}>
+            <View style={styles.sectionHeader}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: colors.text },
+                ]}
+              >
+                Available Branches
+              </Text>
+
+              <Text
+                style={[
+                  styles.branchCount,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {filteredBranches.length}{' '}
+                {filteredBranches.length === 1
+                  ? 'branch'
+                  : 'branches'}
+              </Text>
+            </View>
+
+            {filteredBranches.length > 0 ? (
+              filteredBranches.map((branch) => (
+                <BranchCard
+                  key={branch.id}
+                  branch={branch}
+                  isSelected={
+                    selectedBranchId === branch.id
+                  }
+                  onPress={() =>
+                    handleBranchPress(branch.id)
+                  }
+                  onCheckIn={handleDemoCheckIn}
+                  onCheckOut={handleRequestCheckOut}
+                  activeCheckInBranchId={
+                    activeCheckIn?.branchId ?? null
+                  }
+                  checkedInAt={
+                    activeCheckIn?.branchId === branch.id
+                      ? activeCheckIn.checkedInAt
+                      : null
+                  }
+                />
+              ))
+            ) : (
+              <View
+                style={[
+                  styles.emptyState,
+                  {
+                    backgroundColor:
+                      colors.backgroundElement,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="search-outline"
+                  size={32}
+                  color={colors.textSecondary}
+                />
+
+                <Text
+                  style={[
+                    styles.emptyTitle,
+                    { color: colors.text },
+                  ]}
+                >
+                  No matching branches
+                </Text>
+
+                <Text
+                  style={[
+                    styles.emptyDescription,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  Try searching for another branch
+                  name or location.
+                </Text>
+
+                <Pressable
+                  onPress={clearSearch}
+                  accessibilityRole="button"
+                >
+                  <Text
+                    style={[
+                      styles.clearText,
+                      { color: colors.marigold },
+                    ]}
+                  >
+                    Clear search
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* Reminder Message */}
             <View
               style={[
-                styles.emptyState,
+                styles.reminderCard,
                 {
                   backgroundColor:
                     colors.backgroundElement,
+                  borderColor: colors.border,
                 },
               ]}
             >
               <Ionicons
-                name="search-outline"
-                size={32}
+                name="information-circle-outline"
+                size={24}
                 color={colors.textSecondary}
               />
 
               <Text
                 style={[
-                  styles.emptyTitle,
-                  { color: colors.text },
-                ]}
-              >
-                No matching branches
-              </Text>
-
-              <Text
-                style={[
-                  styles.emptyDescription,
+                  styles.reminderText,
                   { color: colors.textSecondary },
                 ]}
               >
-                Try searching for another branch
-                name or location.
+                Don&apos;t forget to check out when
+                leaving the gym.
               </Text>
-
-              <Pressable
-                onPress={clearSearch}
-                accessibilityRole="button"
-              >
-                <Text
-                  style={[
-                    styles.clearText,
-                    { color: colors.marigold },
-                  ]}
-                >
-                  Clear search
-                </Text>
-              </Pressable>
             </View>
-          )}
+          </View>
         </View>
       </ScrollView>
+
+      {/* Floating Success Notification */}
+      {toastMessage !== null && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.toastPosition,
+            {
+              top: insets.top + 16,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.toastBox,
+              {
+                backgroundColor:
+                  colors.backgroundElement,
+                borderColor: colors.success,
+              },
+            ]}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={24}
+              color={colors.success}
+            />
+
+            <Text
+              style={[
+                styles.toastText,
+                { color: colors.text },
+              ]}
+            >
+              {toastMessage}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* Check Out Confirmation Modal */}
       <Modal
@@ -442,7 +565,6 @@ export default function BranchScreen() {
               },
             ]}
           >
-            {/* Icon */}
             <View
               style={[
                 styles.modalIcon,
@@ -459,7 +581,6 @@ export default function BranchScreen() {
               />
             </View>
 
-            {/* Title */}
             <Text
               style={[
                 styles.modalTitle,
@@ -469,7 +590,6 @@ export default function BranchScreen() {
               Confirm Check Out
             </Text>
 
-            {/* Description */}
             <Text
               style={[
                 styles.modalDescription,
@@ -484,7 +604,6 @@ export default function BranchScreen() {
                   }?`}
             </Text>
 
-            {/* Action buttons */}
             <View style={styles.modalActions}>
               {!isCheckingOut && (
                 <Pressable
@@ -569,18 +688,26 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
     paddingBottom: Spacing.five,
   },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.four,
-    gap: Spacing.two,
+  hero: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.five,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
   },
 
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.three,
+  },
+
+  heroTextBlock: {
+    flex: 1,
   backButton: {
     width: 44,
     height: 44,
@@ -594,18 +721,25 @@ const styles = StyleSheet.create({
     height: 50,
   },
 
-  headerText: {
-    flex: 1,
+  brand: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 3,
+    marginBottom: Spacing.three,
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: Spacing.two,
   },
 
-  subtitle: {
-    fontSize: 12,
-    marginTop: Spacing.one,
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#C9D1DD',
+    maxWidth: '90%',
   },
 
   profileIcon: {
@@ -614,15 +748,24 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.20)',
+  },
+
+  content: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.four,
   },
 
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: Spacing.three,
     height: 52,
     gap: Spacing.two,
+    borderWidth: 1,
   },
 
   searchInput: {
@@ -674,6 +817,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginTop: Spacing.two,
+  },
+
+  reminderCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: Spacing.three,
+    marginTop: Spacing.one,
+  },
+
+  reminderText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+
+  toastPosition: {
+    position: 'absolute',
+    left: Spacing.four,
+    right: Spacing.four,
+    zIndex: 20,
+    elevation: 20,
+  },
+
+  toastBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.three,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: Spacing.two,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  toastText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 19,
   },
 
   // Check Out confirmation popup

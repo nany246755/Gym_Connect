@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   TextInput,
   View,
 } from 'react-native';
@@ -225,6 +226,87 @@ export default function EquipmentFormScreen() {
               )}
             </Card>
 
+            {/* Optional floor placement: existing equipment fields above are unchanged. */}
+            <Card>
+              <View style={styles.row}>
+                <View style={styles.flex}>
+                  <ThemedText type="smallBold">Floor position</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Optional · Position this equipment on the member gym floor
+                  </ThemedText>
+                </View>
+                <Switch
+                  accessibilityLabel="Enable equipment floor position"
+                  value={item.floorPlacement !== undefined}
+                  onValueChange={setFloorPlacementEnabled}
+                  trackColor={{ false: theme.border, true: theme.primary }}
+                  thumbColor={theme.backgroundElement}
+                  ios_backgroundColor={theme.border}
+                />
+              </View>
+
+              {item.floorPlacement && (
+                <View style={styles.floorSettings}>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Choose the starting cell and tile size on a four-column floor (up to 24 rows).
+                  </ThemedText>
+                  <View style={styles.row}>
+                    <View style={styles.flex}>
+                      <PositionStepper
+                        label="Row"
+                        value={item.floorPlacement.row}
+                        min={1}
+                        max={24 - (item.floorPlacement.rowSpan ?? 1) + 1}
+                        onChange={(value) => setFloorPlacementField('row', value)}
+                      />
+                    </View>
+                    <View style={styles.flex}>
+                      <PositionStepper
+                        label="Column"
+                        value={item.floorPlacement.column}
+                        min={1}
+                        max={4 - (item.floorPlacement.columnSpan ?? 1) + 1}
+                        onChange={(value) => setFloorPlacementField('column', value)}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.row}>
+                    <View style={styles.flex}>
+                      <PositionStepper
+                        label="Height · rows"
+                        value={item.floorPlacement.rowSpan ?? 1}
+                        min={1}
+                        max={6}
+                        onChange={(value) => setFloorPlacementField('rowSpan', value)}
+                      />
+                    </View>
+                    <View style={styles.flex}>
+                      <PositionStepper
+                        label="Width · columns"
+                        value={item.floorPlacement.columnSpan ?? 1}
+                        min={1}
+                        max={4}
+                        onChange={(value) => setFloorPlacementField('columnSpan', value)}
+                      />
+                    </View>
+                  </View>
+                  <View style={[styles.placementSummary, { backgroundColor: theme.backgroundSelected }]}>
+                    <ThemedText type="smallBold">
+                      Row {item.floorPlacement.row}, Column {item.floorPlacement.column}
+                    </ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {item.floorPlacement.rowSpan ?? 1} row(s) × {item.floorPlacement.columnSpan ?? 1} column(s)
+                    </ThemedText>
+                  </View>
+                  {data.isNew && data.branchIds.length > 1 && (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      This placement applies to each selected branch. Saving checks for overlaps in every branch.
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+            </Card>
+
             {error && (
               <ThemedText type="small" style={{ color: theme.danger }} accessibilityRole="alert">
                 {error}
@@ -355,6 +437,47 @@ function Select({ value, label, onPress }: { value: string; label: string; onPre
   );
 }
 
+// Floor-position controls used only by the Admin Add/Edit screen.
+function PositionStepper({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
+  const theme = useTheme();
+  return (
+    <View style={styles.stepperGroup}>
+      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+      <View style={[styles.stepper, { borderColor: theme.border }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Decrease ${label}`}
+          disabled={value <= min}
+          onPress={() => onChange(value - 1)}
+          style={[styles.stepperButton, { opacity: value <= min ? 0.3 : 1 }]}>
+          <ThemedText type="smallBold" style={styles.stepperSymbol}>−</ThemedText>
+        </Pressable>
+        <ThemedText type="smallBold" style={styles.stepperValue}>{value}</ThemedText>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Increase ${label}`}
+          disabled={value >= max}
+          onPress={() => onChange(value + 1)}
+          style={[styles.stepperButton, { opacity: value >= max ? 0.3 : 1 }]}>
+          <ThemedText type="smallBold" style={styles.stepperSymbol}>+</ThemedText>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { alignItems: 'center', justifyContent: 'center' },
@@ -402,4 +525,19 @@ const styles = StyleSheet.create({
   },
   saveButton: { flex: 2 },
   sheetOption: { justifyContent: 'flex-start' },
+  // Only the new floor-position section uses these styles.
+  floorSettings: { gap: Spacing.three },
+  placementSummary: { borderRadius: Spacing.two, padding: Spacing.three, gap: Spacing.one },
+  stepperGroup: { gap: Spacing.one },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 44,
+    borderWidth: 1,
+    borderRadius: Spacing.two,
+    overflow: 'hidden',
+  },
+  stepperButton: { width: 40, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  stepperSymbol: { fontSize: 20 },
+  stepperValue: { flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] },
 });
