@@ -16,9 +16,21 @@ import {
   SpottingRequestsProvider,
 } from '../features/spotting/SpottingRequestsProvider';
 
+import {
+  BranchProvider,
+} from './BranchContext';
+
+import {
+  RestTimerProvider,
+} from './RestTimerContext';
+
 interface Props {
   children: ReactNode;
 }
+
+// ==========================================
+// MESSAGING CONNECTION BRIDGE
+// ==========================================
 
 function MessagingConnectionBridge({ children }: Props) {
   const { connectedPartners } = useSharedPartners();
@@ -42,14 +54,22 @@ function MessagingConnectionBridge({ children }: Props) {
   );
 }
 
+// ==========================================
+// APP PROVIDERS
+// ==========================================
+
 export function GymConnectProviders({ children }: Props) {
   return (
-    <PartnersProvider>
-      <MessagingConnectionBridge>
-        <SpottingRequestsProvider>
-          {children}
-        </SpottingRequestsProvider>
-      </MessagingConnectionBridge>
-    </PartnersProvider>
+    <RestTimerProvider>
+      <BranchProvider>
+        <PartnersProvider>
+          <MessagingConnectionBridge>
+            <SpottingRequestsProvider>
+              {children}
+            </SpottingRequestsProvider>
+          </MessagingConnectionBridge>
+        </PartnersProvider>
+      </BranchProvider>
+    </RestTimerProvider>
   );
 }
