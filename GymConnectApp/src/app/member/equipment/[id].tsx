@@ -1,19 +1,13 @@
+import { equipmentStatusColors as getStatusColors } from '@/constants/equipment-status-colors';
 
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentRef,
-} from 'react';
 
 import {
   ActivityIndicator,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -37,61 +31,21 @@ import { useTheme } from '@/hooks/use-theme';
 
 import {
   MUSCLE_LABEL,
+  equipmentImage,
   STATUS_LABEL,
 } from '@/logic/equipment';
 
 import {
-  findEquipmentAlternatives,
-  type EquipmentAlternative,
-} from '@/logic/equipment-alternatives';
-
-import {
   MAX_EQUIPMENT_REPORT_NOTE_LENGTH,
-  submitEquipmentReport,
   type ReportableEquipmentStatus,
 } from '@/services/equipment-report-service';
 
-import {
-  getEquipment,
-  listEquipment,
-} from '@/services/equipment-service';
+import { useEquipmentDetails } from '@/logic/use-equipment-details';
+import type { EquipmentAlternative } from '@/logic/equipment-alternatives';
 
 import type {
   Equipment,
-  EquipmentStatus,
 } from '@/types/equipment';
-
-// Equipment status colors from the shared theme.
-function getStatusColors(
-  theme: ReturnType<typeof useTheme>,
-  status: EquipmentStatus
-) {
-  switch (status) {
-    case 'Available':
-      return {
-        foreground: theme.success,
-        background: theme.successSoft,
-      };
-
-    case 'Occupied':
-      return {
-        foreground: theme.danger,
-        background: theme.dangerSoft,
-      };
-
-    case 'AvailableSoon':
-      return {
-        foreground: theme.accentText,
-        background: theme.accentSoft,
-      };
-
-    case 'Maintenance':
-      return {
-        foreground: theme.textSecondary,
-        background: theme.backgroundSelected,
-      };
-  }
-}
 
 // Temporary descriptions for prototype equipment.
 // These are display information only.
@@ -241,17 +195,6 @@ const REPORT_STATUS_LABELS: Record<
   AvailableSoon: 'Available soon',
 };
 
-function isReportableStatus(
-  status: EquipmentStatus
-): status is ReportableEquipmentStatus {
-  return (
-    status === 'Available' ||
-    status === 'Occupied' ||
-    status === 'AvailableSoon'
-  );
-}
-
-// Existing status selector.
 function EquipmentStatusSelector({
   selectedStatus,
   onSelect,
@@ -464,284 +407,7 @@ export default function EquipmentDetailsScreen() {
     id: string;
   }>();
 
-  // Correct ScrollView instance type.
-  const scrollRef =
-    useRef<ComponentRef<typeof ScrollView>>(null);
-
-  const noteFocusedRef = useRef(false);
-
-  // Used to discard results from outdated requests.
-  const alternativeRequestRef = useRef(0);
-
-  const [equipment, setEquipment] =
-    useState<Equipment | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const [
-    selectedStatus,
-    setSelectedStatus,
-  ] = useState<ReportableEquipmentStatus | null>(null);
-
-  const [note, setNote] = useState('');
-
-  const [submitting, setSubmitting] = useState(false);
-
-  const [
-    submitError,
-    setSubmitError,
-  ] = useState<string | null>(null);
-
-  const [reportSaved, setReportSaved] =
-    useState(false);
-
-  // NEW: Alternatives state.
-  const [alternatives, setAlternatives] =
-    useState<EquipmentAlternative[]>([]);
-
-  const [
-    alternativesVisible,
-    setAlternativesVisible,
-  ] = useState(false);
-
-  const [
-    alternativesLoading,
-    setAlternativesLoading,
-  ] = useState(false);
-
-  const [
-    alternativesError,
-    setAlternativesError,
-  ] = useState<string | null>(null);
-
-  // Existing keyboard fix for the optional note.
-  useEffect(() => {
-    const keyboardSubscription = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        if (noteFocusedRef.current) {
-          scrollRef.current?.scrollToEnd({
-            animated: true,
-          });
-        }
-      }
-    );
-
-    return () => {
-      keyboardSubscription.remove();
-    };
-  }, []);
-
-  // Load the selected equipment.
-  useEffect(() => {
-    let active = true;
-
-    setLoading(true);
-    setError(null);
-    setEquipment(null);
-    setSelectedStatus(null);
-
-    setNote('');
-    setSubmitError(null);
-    setReportSaved(false);
-
-    // NEW: Reset alternatives for a different machine.
-    alternativeRequestRef.current += 1;
-
-    setAlternatives([]);
-    setAlternativesVisible(false);
-    setAlternativesLoading(false);
-    setAlternativesError(null);
-
-    if (!id) {
-      setError('No equipment was selected.');
-      setLoading(false);
-
-      return () => {
-        active = false;
-        alternativeRequestRef.current += 1;
-      };
-    }
-
-    getEquipment(id)
-      .then((item) => {
-        if (!active) return;
-
-        if (!item) {
-          setError('Equipment not found.');
-          return;
-        }
-
-        setEquipment(item);
-
-        setSelectedStatus(
-          isReportableStatus(item.status)
-            ? item.status
-            : null
-        );
-      })
-      .catch(() => {
-        if (!active) return;
-
-        setError(
-          'Could not load equipment details.'
-        );
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      active = false;
-      alternativeRequestRef.current += 1;
-    };
-  }, [id]);
-
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/member/equipment');
-    }
-  };
-
-  // Existing status selection.
-  const chooseStatus = (
-    status: ReportableEquipmentStatus
-  ) => {
-    setSelectedStatus(status);
-    setSubmitError(null);
-    setReportSaved(false);
-  };
-
-  const changeNote = (value: string) => {
-    setNote(value);
-    setSubmitError(null);
-    setReportSaved(false);
-  };
-
-  // Submit a separate member status report.
-  const submitReport = async () => {
-    if (
-      !equipment ||
-      !selectedStatus ||
-      submitting ||
-      reportSaved
-    ) {
-      return;
-    }
-
-    Keyboard.dismiss();
-
-    setSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      await submitEquipmentReport({
-        equipmentId: equipment.id,
-        reportedStatus: selectedStatus,
-        note,
-      });
-
-      setReportSaved(true);
-    } catch (cause) {
-      setSubmitError(
-        cause instanceof Error
-          ? cause.message
-          : 'Could not save your report. Try again.'
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // NEW: Load alternatives using actual branch equipment.
-  const findAlternatives = async () => {
-    if (!equipment || alternativesLoading) {
-      return;
-    }
-
-    Keyboard.dismiss();
-
-    const requestId =
-      ++alternativeRequestRef.current;
-
-    setAlternativesVisible(true);
-    setAlternativesLoading(true);
-    setAlternativesError(null);
-    setAlternatives([]);
-
-    try {
-      // Always read the current saved branch inventory.
-      const branchEquipment = await listEquipment(
-        equipment.branchId
-      );
-
-      // Ensure this search still belongs to the
-      // currently displayed equipment.
-      if (
-        requestId !== alternativeRequestRef.current
-      ) {
-        return;
-      }
-
-      const latestEquipment = branchEquipment.find(
-        (item) => item.id === equipment.id
-      );
-
-      if (!latestEquipment) {
-        throw new Error(
-          'This equipment is no longer available in the branch inventory.'
-        );
-      }
-
-      // Refresh the displayed official status if
-      // Admin changed it before this search.
-      setEquipment(latestEquipment);
-
-      // Reuse the matching logic from Step 6A.
-      const matches = findEquipmentAlternatives(
-        latestEquipment,
-        branchEquipment,
-        5
-      );
-
-      setAlternatives(matches);
-    } catch (cause) {
-      if (
-        requestId !== alternativeRequestRef.current
-      ) {
-        return;
-      }
-
-      setAlternativesError(
-        cause instanceof Error
-          ? cause.message
-          : 'Could not find alternatives. Please try again.'
-      );
-    } finally {
-      if (
-        requestId === alternativeRequestRef.current
-      ) {
-        setAlternativesLoading(false);
-      }
-    }
-  };
-
-  // NEW: Open a matching alternative's details.
-  const openAlternative = (alternativeId: string) => {
-    router.push({
-      pathname: '/member/equipment/[id]',
-      params: {
-        id: alternativeId,
-      },
-    });
-  };
+  const { scrollRef, noteFocusedRef, equipment, loading, error, selectedStatus, note, submitting, submitError, reportSaved, alternatives, alternativesVisible, alternativesLoading, alternativesError, goBack, chooseStatus, changeNote, submitReport, findAlternatives, openAlternative } = useEquipmentDetails(id);
 
   const statusColors = equipment
     ? getStatusColors(theme, equipment.status)
@@ -881,11 +547,9 @@ export default function EquipmentDetailsScreen() {
                     },
                   ]}
                 >
-                  {equipment.imageUrl ? (
+                  {equipmentImage(equipment) !== undefined ? (
                     <Image
-                      source={{
-                        uri: equipment.imageUrl,
-                      }}
+                      source={equipmentImage(equipment)}
                       style={styles.equipmentImage}
                       contentFit="contain"
                       accessibilityLabel={`${equipment.name} image`}
@@ -1128,8 +792,8 @@ export default function EquipmentDetailsScreen() {
 
                       opacity:
                         !selectedStatus ||
-                        submitting ||
-                        reportSaved
+                          submitting ||
+                          reportSaved
                           ? 0.5
                           : pressed
                             ? 0.8
@@ -1205,8 +869,8 @@ export default function EquipmentDetailsScreen() {
                         },
                       ]}
                     >
-                      Report saved on this device.
-                      The equipment's official status
+                      Report saved for this session.
+                      The equipment&apos;s official status
                       has not changed.
                     </ThemedText>
                   </View>
@@ -1216,8 +880,8 @@ export default function EquipmentDetailsScreen() {
                     themeColor="textSecondary"
                     style={styles.notice}
                   >
-                    Reports are stored locally for
-                    future review and do not update
+                    Demo reports reset when the app restarts
+                    and do not update
                     the official equipment status.
                   </ThemedText>
                 )}

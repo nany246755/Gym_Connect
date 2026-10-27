@@ -2,7 +2,6 @@
 import { useFocusEffect } from 'expo-router';
 import {
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -66,18 +65,12 @@ export function useMemberEquipment(
     () => getInitialFilters(branchId)
   );
 
-  // When a different branch becomes active, restore its
-  // matching session state if it is the remembered branch.
-  // Otherwise, reset both filters.
-  useEffect(() => {
+  const [previousBranchId, setPreviousBranchId] = useState(branchId);
+  if (branchId !== previousBranchId) {
+    setPreviousBranchId(branchId);
     const next = getInitialFilters(branchId);
-
-    if (branchId) {
-      savedFilters = next;
-    }
-
     setFilters(next);
-  }, [branchId]);
+  }
 
   // Prevent an old branch's filters from being displayed
   // during the render immediately after a branch change.
@@ -227,7 +220,7 @@ export function useMemberEquipment(
   // Ensure the selected zone exists in this branch.
   const activeZone =
     selectedZone === 'All' ||
-    availableZones.includes(selectedZone)
+      availableZones.includes(selectedZone)
       ? selectedZone
       : 'All';
 

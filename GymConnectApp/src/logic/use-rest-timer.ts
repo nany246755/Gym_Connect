@@ -38,11 +38,26 @@ export function useRestTimer() {
     },
     loading: !ready,
     error,
-    start: () => { setNow(Date.now()); actions.start(); },
-    pause: () => { setNow(Date.now()); actions.pause(); },
-    reset: () => { setNow(Date.now()); actions.reset(); },
-    adjust: (deltaSec: number) => { setNow(Date.now()); actions.adjust(deltaSec); },
-    selectPreset: (sec: number) => { setNow(Date.now()); actions.selectPreset(sec); },
+    start: () => {
+      setNow(Date.now());
+      actions.start();
+    },
+    pause: () => {
+      setNow(Date.now());
+      actions.pause();
+    },
+    reset: () => {
+      setNow(Date.now());
+      actions.reset();
+    },
+    adjust: (deltaSec: number) => {
+      setNow(Date.now());
+      actions.adjust(deltaSec);
+    },
+    selectPreset: (sec: number) => {
+      setNow(Date.now());
+      actions.selectPreset(sec);
+    },
     toggleVibrate: actions.toggleVibrate,
     resetSets: actions.resetSets,
   };

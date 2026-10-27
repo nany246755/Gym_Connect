@@ -49,10 +49,10 @@ export default function BranchCard({
   const formattedCheckInTime =
     checkedInHere && checkedInAt
       ? new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZone: 'Africa/Cairo',
-        }).format(new Date(checkedInAt))
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: 'Africa/Cairo',
+      }).format(new Date(checkedInAt))
       : null;
 
   // Availability message
@@ -117,7 +117,10 @@ export default function BranchCard({
           shadowColor: isDark
             ? colors.marigold
             : colors.navy,
-          shadowOffset: { width: 0, height: 12 },
+          shadowOffset: {
+            width: 0,
+            height: 12
+          },
           shadowOpacity: isDark ? 0.65 : 0.18,
           shadowRadius: isDark ? 18 : 12,
           elevation: 8,
@@ -128,9 +131,8 @@ export default function BranchCard({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${branch.name}, ${
-          isSelected ? 'collapse' : 'expand'
-        } details`}
+        accessibilityLabel={`${branch.name}, ${isSelected ? 'collapse' : 'expand'
+          } details`}
         accessibilityState={{
           expanded: isSelected,
         }}
@@ -166,7 +168,9 @@ export default function BranchCard({
             <Text
               style={[
                 styles.branchName,
-                { color: colors.text },
+                {
+                  color: colors.text
+                },
               ]}
             >
               {branch.name}
@@ -200,7 +204,9 @@ export default function BranchCard({
           <Text
             style={[
               styles.location,
-              { color: colors.textSecondary },
+              {
+                color: colors.textSecondary
+              },
             ]}
           >
             {branch.location}
@@ -217,7 +223,9 @@ export default function BranchCard({
             <Text
               style={[
                 styles.detailText,
-                { color: colors.textSecondary },
+                {
+                  color: colors.textSecondary
+                },
               ]}
             >
               {branch.operatingHours}
@@ -248,7 +256,9 @@ export default function BranchCard({
             <Text
               style={[
                 styles.detailText,
-                { color: colors.textSecondary },
+                {
+                  color: colors.textSecondary
+                },
               ]}
             >
               {branch.checkedInCount} members checked in
@@ -299,7 +309,9 @@ export default function BranchCard({
               <Text
                 style={[
                   styles.availabilityText,
-                  { color: availabilityColor },
+                  {
+                    color: availabilityColor
+                  },
                 ]}
               >
                 {availabilityMessage}
@@ -310,7 +322,9 @@ export default function BranchCard({
                 <Text
                   style={[
                     styles.checkInTime,
-                    { color: colors.textSecondary },
+                    {
+                      color: colors.textSecondary
+                    },
                   ]}
                 >
                   Checked in at {formattedCheckInTime}
@@ -353,7 +367,9 @@ export default function BranchCard({
             <Text
               style={[
                 styles.actionButtonText,
-                { color: buttonTextColor },
+                {
+                  color: buttonTextColor
+                },
               ]}
             >
               {buttonLabel}

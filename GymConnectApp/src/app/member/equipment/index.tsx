@@ -1,5 +1,7 @@
+import { equipmentStatusColors } from '@/constants/equipment-status-colors';
 
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
@@ -12,10 +14,10 @@ import {
   View,
 } from 'react-native';
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { MemberPageHeader } from '@/components/member-page-header';
 
 import {
   MaxContentWidth,
@@ -28,7 +30,7 @@ import EquipmentFloorGrid from '@/features/equipment/EquipmentFloorGrid';
 
 import { useTheme } from '@/hooks/use-theme';
 
-import { STATUS_LABEL } from '@/logic/equipment';
+import { equipmentImage, STATUS_LABEL } from '@/logic/equipment';
 
 import { useMemberEquipment } from '@/logic/use-member-equipment';
 
@@ -37,39 +39,6 @@ import {
   type Equipment,
   type EquipmentStatus,
 } from '@/types/equipment';
-
-// Shared availability colors.
-function getEquipmentStatusStyles(
-  theme: ReturnType<typeof useTheme>
-): Record<
-  EquipmentStatus,
-  {
-    foreground: string;
-    background: string;
-  }
-> {
-  return {
-    Available: {
-      foreground: theme.success,
-      background: theme.successSoft,
-    },
-
-    Occupied: {
-      foreground: theme.danger,
-      background: theme.dangerSoft,
-    },
-
-    AvailableSoon: {
-      foreground: theme.accentText,
-      background: theme.accentSoft,
-    },
-
-    Maintenance: {
-      foreground: theme.textSecondary,
-      background: theme.backgroundSelected,
-    },
-  };
-}
 
 // Equipment card used inside the floor layout
 // and the regular equipment grid.
@@ -81,9 +50,10 @@ function EquipmentTile({
   compact?: boolean;
 }) {
   const theme = useTheme();
+  const image = equipmentImage(item);
 
   const colors =
-    getEquipmentStatusStyles(theme)[item.status];
+    equipmentStatusColors(theme, item.status);
 
   // NEW: Open the selected equipment's details page.
   const openDetails = () => {
@@ -118,6 +88,14 @@ function EquipmentTile({
         color={colors.foreground}
       />
 
+      {image !== undefined && (
+        <Image source={image} contentFit="cover" accessibilityLabel={item.name}
+          style={{
+            width: '100%',
+            height: compact ? 24 : 100,
+            borderRadius: Spacing.two
+          }} />
+      )}
       {/* Equipment Name */}
       <ThemedText
         type="smallBold"
@@ -183,7 +161,7 @@ function AvailabilityLegend() {
   const theme = useTheme();
 
   const statusStyles =
-    getEquipmentStatusStyles(theme);
+    Object.fromEntries(EQUIPMENT_STATUSES.map(status => [status, equipmentStatusColors(theme, status)])) as Record<EquipmentStatus, ReturnType<typeof equipmentStatusColors>>;
 
   return (
     <View style={styles.legendContainer}>
@@ -221,7 +199,6 @@ function AvailabilityLegend() {
 export default function EquipmentAvailabilityScreen() {
   const theme = useTheme();
 
-  const insets = useSafeAreaInsets();
 
   // Shared branch information.
   const {
@@ -264,58 +241,7 @@ export default function EquipmentAvailabilityScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* Profile-style header */}
-        <View
-          style={[
-            styles.hero,
-            {
-              backgroundColor: theme.hero,
-              paddingTop:
-                insets.top + Spacing.three,
-            },
-          ]}
-        >
-          <View style={styles.heroInner}>
-            {/* Gym Connect Branding */}
-            <ThemedText
-              type="smallBold"
-              style={[
-                styles.brand,
-                {
-                  color: theme.accent,
-                },
-              ]}
-            >
-              GYM CONNECT
-            </ThemedText>
-
-            {/* Page Title */}
-            <ThemedText
-              type="subtitle"
-              style={[
-                styles.heroTitle,
-                {
-                  color: theme.heroText,
-                },
-              ]}
-            >
-              Equipment
-            </ThemedText>
-
-            {/* Page Description */}
-            <ThemedText
-              type="small"
-              style={[
-                styles.heroDescription,
-                {
-                  color: theme.heroSubtext,
-                },
-              ]}
-            >
-              Find available equipment at your gym.
-            </ThemedText>
-          </View>
-        </View>
+        <MemberPageHeader title="Equipment" subtitle="Find available equipment at your gym." />
 
         {/* Equipment Content */}
         <View style={styles.content}>
@@ -546,38 +472,6 @@ const styles = StyleSheet.create({
   },
 
   // Profile-style header
-  hero: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.six,
-    borderBottomLeftRadius: Spacing.five,
-    borderBottomRightRadius: Spacing.five,
-  },
-
-  heroInner: {
-    width: '100%',
-    maxWidth: MaxContentWidth,
-    alignSelf: 'center',
-    alignItems: 'center',
-  },
-
-  brand: {
-    alignSelf: 'flex-start',
-    letterSpacing: 3,
-    marginBottom: Spacing.three,
-  },
-
-  heroTitle: {
-    alignSelf: 'flex-start',
-    fontSize: 26,
-    lineHeight: 34,
-  },
-
-  heroDescription: {
-    alignSelf: 'flex-start',
-    marginTop: Spacing.one,
-    fontSize: 13,
-    lineHeight: 19,
-  },
 
   // Equipment content
   content: {
@@ -762,3 +656,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+

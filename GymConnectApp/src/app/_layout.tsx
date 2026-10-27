@@ -24,7 +24,9 @@ export default function RootLayout() {
       }
     >
       <GymConnectProviders>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{
+          headerShown: false
+        }} />
       </GymConnectProviders>
     </ThemeProvider>
   );

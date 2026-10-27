@@ -85,7 +85,7 @@ export function createEquipmentFloorLayout(
     // Identify all cells occupied by this equipment.
     const cells: string[] = [];
 
-    for (let r = row; r < row + rowSpan; r++) {
+    for (let r = row;r < row + rowSpan;r++) {
       for (
         let c = column;
         c < column + columnSpan;

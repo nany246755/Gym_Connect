@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/bottom-sheet';
+import { memberHeaderStyles } from '@/components/member-header-styles';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { MEMBER_TAB_BAR_SPACE, useHideMemberTabBar } from '@/components/member-tab-bar';
@@ -109,22 +110,28 @@ export default function ProfileScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          !showSaveBar && { paddingBottom: MEMBER_TAB_BAR_SPACE + insets.bottom },
+          !showSaveBar && {
+            paddingBottom: MEMBER_TAB_BAR_SPACE + insets.bottom
+          },
         ]}>
         {/* Profile Header */}
         <View
           style={[
-            styles.hero,
+            memberHeaderStyles.hero,
             {
               backgroundColor: theme.hero,
               paddingTop: insets.top + Spacing.three,
             },
           ]}
         >
-          <View style={styles.heroInner}>
+          <View style={[memberHeaderStyles.inner, {
+            alignItems: 'center'
+          }]}>
             <ThemedText
               type="smallBold"
-              style={[styles.brand, { color: theme.accent }]}
+              style={[memberHeaderStyles.brand, {
+                color: theme.accent
+              }]}
             >
               GYM CONNECT
             </ThemedText>
@@ -143,14 +150,18 @@ export default function ProfileScreen() {
             >
               {user.avatarUrl ? (
                 <Image
-                  source={{ uri: user.avatarUrl }}
+                  source={{
+                    uri: user.avatarUrl
+                  }}
                   style={styles.avatarImage}
                   contentFit="cover"
                 />
               ) : (
                 <ThemedText
                   type="subtitle"
-                  style={{ color: theme.heroText }}
+                  style={{
+                    color: theme.heroText
+                  }}
                 >
                   {initials(user.fullName)}
                 </ThemedText>
@@ -175,7 +186,9 @@ export default function ProfileScreen() {
 
             <ThemedText
               type="subtitle"
-              style={[styles.name, { color: theme.heroText }]}
+              style={[styles.name, {
+                color: theme.heroText
+              }]}
               numberOfLines={1}
             >
               {user.fullName}
@@ -183,7 +196,9 @@ export default function ProfileScreen() {
 
             <ThemedText
               type="small"
-              style={{ color: theme.heroSubtext }}
+              style={{
+                color: theme.heroSubtext
+              }}
               numberOfLines={1}
             >
               {user.email}
@@ -193,12 +208,16 @@ export default function ProfileScreen() {
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: theme.accent },
+                  {
+                    backgroundColor: theme.accent
+                  },
                 ]}
               >
                 <ThemedText
                   type="smallBold"
-                  style={{ color: theme.onAccent }}
+                  style={{
+                    color: theme.onAccent
+                  }}
                 >
                   {user.fitnessLevel}
                 </ThemedText>
@@ -208,7 +227,9 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.pill,
-                    { backgroundColor: theme.heroChip },
+                    {
+                      backgroundColor: theme.heroChip
+                    },
                   ]}
                 >
                   <SymbolView
@@ -219,7 +240,9 @@ export default function ProfileScreen() {
 
                   <ThemedText
                     type="small"
-                    style={{ color: theme.heroText }}
+                    style={{
+                      color: theme.heroText
+                    }}
                   >
                     {shortBranchName(branch.name)}
                   </ThemedText>
@@ -382,14 +405,18 @@ export default function ProfileScreen() {
                 onPress={() => setSheet('branch')}
                 style={[
                   styles.branchBox,
-                  { borderColor: theme.accent },
+                  {
+                    borderColor: theme.accent
+                  },
                 ]}
               >
                 <BranchInfo branch={branch} />
 
                 <ThemedText
                   type="smallBold"
-                  style={{ color: theme.accentText }}
+                  style={{
+                    color: theme.accentText
+                  }}
                 >
                   Change
                 </ThemedText>
@@ -400,7 +427,9 @@ export default function ProfileScreen() {
               style={[
                 styles.row,
                 styles.divider,
-                { borderColor: theme.border },
+                {
+                  borderColor: theme.border
+                },
               ]}
             >
               <View style={styles.flex}>
@@ -450,7 +479,9 @@ export default function ProfileScreen() {
               type="small"
               style={[
                 styles.center,
-                { color: theme.danger },
+                {
+                  color: theme.danger
+                },
               ]}
               accessibilityRole="alert"
             >
@@ -485,7 +516,9 @@ export default function ProfileScreen() {
 
             <ThemedText
               type="smallBold"
-              style={{ color: theme.danger }}
+              style={{
+                color: theme.danger
+              }}
             >
               Log out
             </ThemedText>
@@ -602,13 +635,13 @@ export default function ProfileScreen() {
               onLayout={
                 slot === scrollTarget
                   ? (e) =>
-                      timeScroll.current?.scrollTo({
-                        y: Math.max(
-                          0,
-                          e.nativeEvent.layout.y - Spacing.five
-                        ),
-                        animated: false,
-                      })
+                    timeScroll.current?.scrollTo({
+                      y: Math.max(
+                        0,
+                        e.nativeEvent.layout.y - Spacing.five
+                      ),
+                      animated: false,
+                    })
                   : undefined
               }
               onPress={() => {
@@ -660,7 +693,9 @@ function Card({
         <View
           style={[
             styles.cardIcon,
-            { backgroundColor: theme.accentSoft },
+            {
+              backgroundColor: theme.accentSoft
+            },
           ]}
         >
           <SymbolView
@@ -768,7 +803,9 @@ function FieldError({
   return (
     <ThemedText
       type="small"
-      style={{ color: theme.danger }}
+      style={{
+        color: theme.danger
+      }}
       accessibilityRole="alert"
     >
       {message}
@@ -808,26 +845,6 @@ const styles = StyleSheet.create({
 
   center: {
     textAlign: 'center',
-  },
-
-  hero: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.six,
-    borderBottomLeftRadius: Spacing.five,
-    borderBottomRightRadius: Spacing.five,
-  },
-
-  heroInner: {
-    width: '100%',
-    maxWidth: MaxContentWidth,
-    alignSelf: 'center',
-    alignItems: 'center',
-  },
-
-  brand: {
-    alignSelf: 'flex-start',
-    letterSpacing: 3,
-    marginBottom: Spacing.three,
   },
 
   avatar: {

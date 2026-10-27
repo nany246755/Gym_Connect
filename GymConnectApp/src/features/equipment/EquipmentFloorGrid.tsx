@@ -142,12 +142,12 @@ export default function EquipmentFloorGrid({
   const columnWidth =
     containerWidth > 0
       ? Math.max(
-          0,
-          (
-            containerWidth -
-            GAP * (FLOOR_COLUMNS - 1)
-          ) / FLOOR_COLUMNS
-        )
+        0,
+        (
+          containerWidth -
+          GAP * (FLOOR_COLUMNS - 1)
+        ) / FLOOR_COLUMNS
+      )
       : 0;
 
   // Compact height based on the last positioned row.
@@ -193,7 +193,6 @@ export default function EquipmentFloorGrid({
             </ThemedText>
           </View>
 
-        
 
           <View
             style={[
@@ -270,14 +269,14 @@ export default function EquipmentFloorGrid({
 
                     const width =
                       position.columnSpan *
-                        columnWidth +
+                      columnWidth +
                       (
                         position.columnSpan - 1
                       ) * GAP;
 
                     const height =
                       position.rowSpan *
-                        CELL_HEIGHT +
+                      CELL_HEIGHT +
                       (
                         position.rowSpan - 1
                       ) * GAP;

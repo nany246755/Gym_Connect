@@ -50,7 +50,10 @@ export function useProfile() {
   }, [justSaved]);
 
   const edit = (change: (u: User) => Partial<User>) => {
-    setDraft((u) => (u ? { ...u, ...change(u) } : u));
+    setDraft((u) => (u ? {
+      ...u,
+      ...change(u)
+    } : u));
     setJustSaved(false);
   };
 
@@ -64,19 +67,35 @@ export function useProfile() {
       dirty: JSON.stringify(draft) !== JSON.stringify(saved),
       saving,
       justSaved,
-      errors: showErrors ? errors : { scheduleTime: errors.scheduleTime },
+      errors: showErrors ? errors : {
+        scheduleTime: errors.scheduleTime
+      },
     },
     loading,
     error,
-    setFitnessLevel: (fitnessLevel: FitnessLevel) => edit(() => ({ fitnessLevel })),
+    setFitnessLevel: (fitnessLevel: FitnessLevel) => edit(() => ({
+      fitnessLevel
+    })),
     toggleTrainingStyle: (style: TrainingStyle) =>
-      edit((u) => ({ trainingStyles: toggleInOrder(TRAINING_STYLES, u.trainingStyles, style) })),
+      edit((u) => ({
+        trainingStyles: toggleInOrder(TRAINING_STYLES, u.trainingStyles, style)
+      })),
     toggleDay: (day: WeekDay) =>
-      edit((u) => ({ scheduleDays: toggleInOrder(WEEK_DAYS, u.scheduleDays, day) })),
-    setScheduleFrom: (scheduleFrom: string) => edit(() => ({ scheduleFrom })),
-    setScheduleTo: (scheduleTo: string) => edit(() => ({ scheduleTo })),
-    setHomeBranch: (homeBranchId: string) => edit(() => ({ homeBranchId })),
-    setVisibleInSearch: (visibleInSearch: boolean) => edit(() => ({ visibleInSearch })),
+      edit((u) => ({
+        scheduleDays: toggleInOrder(WEEK_DAYS, u.scheduleDays, day)
+      })),
+    setScheduleFrom: (scheduleFrom: string) => edit(() => ({
+      scheduleFrom
+    })),
+    setScheduleTo: (scheduleTo: string) => edit(() => ({
+      scheduleTo
+    })),
+    setHomeBranch: (homeBranchId: string) => edit(() => ({
+      homeBranchId
+    })),
+    setVisibleInSearch: (visibleInSearch: boolean) => edit(() => ({
+      visibleInSearch
+    })),
     pickAvatar: async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -85,7 +104,9 @@ export function useProfile() {
         quality: 0.7,
       });
       if (!result.canceled && result.assets[0]) {
-        edit(() => ({ avatarUrl: result.assets[0].uri }));
+        edit(() => ({
+          avatarUrl: result.assets[0].uri
+        }));
       }
     },
     setAppearance: (mode: AppearanceMode) => {
@@ -96,7 +117,10 @@ export function useProfile() {
     save: async () => {
       setShowErrors(true);
       if (!draft || Object.keys(errors).length > 0) return;
-      const clean = { ...draft, fullName: draft.fullName.trim() };
+      const clean = {
+        ...draft,
+        fullName: draft.fullName.trim()
+      };
       setSaving(true);
       setError(null);
       try {

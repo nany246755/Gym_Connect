@@ -21,8 +21,14 @@ export function Chip({ label, selected, multiple, check = multiple, dot, tone = 
   const theme = useTheme();
   const colors =
     tone === 'accent'
-      ? { bg: selected ? theme.accent : theme.accentSoft, fg: selected ? theme.onAccent : theme.accentText }
-      : { bg: selected ? theme.primary : theme.backgroundSelected, fg: selected ? theme.onPrimary : theme.text };
+      ? {
+        bg: selected ? theme.accent : theme.accentSoft,
+        fg: selected ? theme.onAccent : theme.accentText
+      }
+      : {
+        bg: selected ? theme.primary : theme.backgroundSelected,
+        fg: selected ? theme.onPrimary : theme.text
+      };
 
   return (
     <Pressable
@@ -31,7 +37,10 @@ export function Chip({ label, selected, multiple, check = multiple, dot, tone = 
       aria-disabled={!!rest.disabled}
       style={({ pressed }) => [
         styles.chip,
-        { backgroundColor: colors.bg, opacity: rest.disabled ? 0.35 : pressed ? 0.8 : 1 },
+        {
+          backgroundColor: colors.bg,
+          opacity: rest.disabled ? 0.35 : pressed ? 0.8 : 1
+        },
         style,
       ]}
       {...rest}>
@@ -43,8 +52,12 @@ export function Chip({ label, selected, multiple, check = multiple, dot, tone = 
           tintColor={colors.fg}
         />
       )}
-      {dot && !(check && selected) && <View style={[styles.dot, { backgroundColor: dot }]} />}
-      <ThemedText type="smallBold" style={{ color: colors.fg }}>
+      {dot && !(check && selected) && <View style={[styles.dot, {
+        backgroundColor: dot
+      }]} />}
+      <ThemedText type="smallBold" style={{
+        color: colors.fg
+      }}>
         {label}
       </ThemedText>
     </Pressable>
@@ -62,5 +75,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4
+  },
 });

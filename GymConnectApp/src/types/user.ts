@@ -1,4 +1,4 @@
-// users/{userId} — see CLAUDE.md §6.
+// Member profile stored at users/{userId}.
 
 export const FITNESS_LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
 export type FitnessLevel = (typeof FITNESS_LEVELS)[number];

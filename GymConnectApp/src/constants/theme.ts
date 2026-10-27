@@ -1,6 +1,6 @@
 
 /**
- * The only place colours are defined (see CLAUDE.md §7 and §9).
+ * Shared application colours.
  *
  * Built on the two brand colours:
  * Midnight #14213D and Marigold #FCA311.
@@ -267,6 +267,8 @@ export const MaxContentWidth = 800;
  */
 export const NoWebOutline = (
   Platform.OS === 'web'
-    ? { outlineStyle: 'none' }
+    ? {
+      outlineStyle: 'none'
+    }
     : {}
 ) as unknown as TextStyle;

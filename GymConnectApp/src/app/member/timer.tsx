@@ -15,7 +15,11 @@ import { useRestTimer } from '@/logic/use-rest-timer';
 
 const RING_SIZE = 260;
 
-const STATUS_LABEL = { idle: 'Ready', running: 'Remaining', paused: 'Paused' } as const;
+const STATUS_LABEL = {
+  idle: 'Ready',
+  running: 'Remaining',
+  paused: 'Paused'
+} as const;
 
 // Screen 7 — Rest Timer (FR-4). Optional `?exercise=Bench Press` comes from Equipment Details.
 export default function RestTimerScreen() {
@@ -51,7 +55,10 @@ export default function RestTimerScreen() {
           </View>
 
           <View style={styles.setRow}>
-            <View style={[styles.setPill, { backgroundColor: theme.backgroundElement, borderColor: theme.accent }]}>
+            <View style={[styles.setPill, {
+              backgroundColor: theme.backgroundElement,
+              borderColor: theme.accent
+            }]}>
               <ThemedText type="smallBold">Set {data.setNumber}</ThemedText>
             </View>
             {data.setNumber > 1 && (
@@ -132,7 +139,9 @@ export default function RestTimerScreen() {
             />
           </View>
 
-          <ThemedView type="backgroundElement" style={[styles.card, { borderColor: theme.border }]}>
+          <ThemedView type="backgroundElement" style={[styles.card, {
+            borderColor: theme.border
+          }]}>
             <View style={styles.flex}>
               <ThemedText type="smallBold">Vibrate when finished</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
@@ -143,7 +152,10 @@ export default function RestTimerScreen() {
               accessibilityLabel="Vibrate when finished"
               value={data.vibrate}
               onValueChange={toggleVibrate}
-              trackColor={{ true: theme.accent, false: theme.border }}
+              trackColor={{
+                true: theme.accent,
+                false: theme.border
+              }}
               thumbColor={theme.backgroundElement}
               ios_backgroundColor={theme.border}
             />
@@ -161,25 +173,64 @@ export default function RestTimerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centered: { alignItems: 'center', justifyContent: 'center' },
-  safeArea: { flex: 1, width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center' },
-  content: { padding: Spacing.four, gap: Spacing.four },
-  header: { gap: Spacing.one },
-  eyebrow: { letterSpacing: 1 },
-  setRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  container: {
+    flex: 1
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  safeArea: {
+    flex: 1,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center'
+  },
+  content: {
+    padding: Spacing.four,
+    gap: Spacing.four
+  },
+  header: {
+    gap: Spacing.one
+  },
+  eyebrow: {
+    letterSpacing: 1
+  },
+  setRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three
+  },
   setPill: {
     borderLeftWidth: 4,
     borderRadius: Spacing.two,
     paddingVertical: Spacing.one,
     paddingHorizontal: Spacing.three,
   },
-  textButton: { minHeight: 44, justifyContent: 'center' },
-  ringRow: { alignItems: 'center', paddingVertical: Spacing.two },
-  clock: { fontSize: 64, lineHeight: 72, fontWeight: 700, fontVariant: ['tabular-nums'] },
-  row: { flexDirection: 'row', gap: Spacing.two },
-  flex: { flex: 1 },
-  mainButton: { flex: 2 },
+  textButton: {
+    minHeight: 44,
+    justifyContent: 'center'
+  },
+  ringRow: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two
+  },
+  clock: {
+    fontSize: 64,
+    lineHeight: 72,
+    fontWeight: 700,
+    fontVariant: ['tabular-nums']
+  },
+  row: {
+    flexDirection: 'row',
+    gap: Spacing.two
+  },
+  flex: {
+    flex: 1
+  },
+  mainButton: {
+    flex: 2
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',

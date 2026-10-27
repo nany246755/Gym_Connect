@@ -17,13 +17,23 @@ type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
 
 export function Button({ title, variant = 'primary', icon, style, disabled, ...rest }: ButtonProps) {
   const theme = useTheme();
-  const fill = { primary: theme.primary, danger: theme.danger, secondary: theme.backgroundElement }[variant];
-  const text = { primary: theme.onPrimary, danger: theme.onDanger, secondary: theme.text }[variant];
+  const fill = {
+    primary: theme.primary,
+    danger: theme.danger,
+    secondary: theme.backgroundElement
+  }[variant];
+  const text = {
+    primary: theme.onPrimary,
+    danger: theme.onDanger,
+    secondary: theme.text
+  }[variant];
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: !!disabled }}
+      accessibilityState={{
+        disabled: !!disabled
+      }}
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
@@ -36,7 +46,9 @@ export function Button({ title, variant = 'primary', icon, style, disabled, ...r
       ]}
       {...rest}>
       {icon && <SymbolView name={icon} size={18} tintColor={text} />}
-      <ThemedText type="smallBold" style={{ color: text }}>
+      <ThemedText type="smallBold" style={{
+        color: text
+      }}>
         {title}
       </ThemedText>
     </Pressable>

@@ -1,8 +1,10 @@
 
 import { useEffect, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 
 import {
   commonZones,
+  equipmentImage,
   validateEquipment,
   withStatus,
 } from '@/logic/equipment';
@@ -94,62 +96,65 @@ export function useEquipmentForm(
   useEffect(() => {
     let active = true;
 
-    setLoading(true);
-    setError(null);
+    Promise.resolve().then(() => {
+      if (!active) return;
+      setLoading(true);
+      setError(null);
 
-    Promise.all([
-      getBranches(),
-      id
-        ? getEquipment(id)
-        : Promise.resolve(undefined),
-    ])
-      .then(([list, existing]) => {
-        if (!active) return;
+      return Promise.all([
+        getBranches(),
+        id
+          ? getEquipment(id)
+          : Promise.resolve(undefined),
+      ])
+        .then(([list, existing]) => {
+          if (!active) return;
 
-        setBranches(list);
+          setBranches(list);
 
-        if (id && !existing) {
-          setError('This equipment no longer exists.');
-          return;
-        }
-
-        const branch =
-          list.find((b) => b.id === branchId) ??
-          list[0];
-
-        if (!branch) {
-          setError('No branches are available.');
-          return;
-        }
-
-        setBranchIds([
-          existing?.branchId ?? branch.id,
-        ]);
-
-        setItem(
-          existing ?? {
-            id: `eq-${Date.now()}`,
-            branchId: branch.id,
-            name: '',
-            zone: branch.zones[0] ?? '',
-            station: '',
-            muscleGroup: 'Chest',
-            units: 1,
-            status: 'Available',
+          if (id && !existing) {
+            setError('This equipment no longer exists.');
+            return;
           }
-        );
-      })
-      .catch(() => {
-        if (active) {
-          setError('Could not load the equipment.');
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
 
+          const branch =
+            list.find((b) => b.id === branchId) ??
+            list[0];
+
+          if (!branch) {
+            setError('No branches are available.');
+            return;
+          }
+
+          setBranchIds([
+            existing?.branchId ?? branch.id,
+          ]);
+
+          setItem(
+            existing ?? {
+              id: `eq-${Date.now()}`,
+              branchId: branch.id,
+              name: '',
+              zone: branch.zones[0] ?? '',
+              station: '',
+              muscleGroup: 'Chest',
+              units: 1,
+              status: 'Available',
+            }
+          );
+        })
+        .catch(() => {
+          if (active) {
+            setError('Could not load the equipment.');
+          }
+        })
+        .finally(() => {
+          if (active) {
+            setLoading(false);
+          }
+        });
+
+    });
     return () => {
       active = false;
     };
@@ -192,11 +197,11 @@ export function useEquipmentForm(
       ...equipment,
       floorPlacement: enabled
         ? equipment.floorPlacement ?? {
-            row: 1,
-            column: 1,
-            rowSpan: 1,
-            columnSpan: 1,
-          }
+          row: 1,
+          column: 1,
+          rowSpan: 1,
+          columnSpan: 1,
+        }
         : undefined,
     }));
   };
@@ -272,6 +277,28 @@ export function useEquipmentForm(
 
     loading,
     error,
+    pickPhoto: async () => {
+      try {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const imageUrl = result.assets[0].uri;
+          edit((equipment) => ({
+            ...equipment,
+            imageUrl
+          }));
+        }
+      } catch {
+        setError('Could not open the photo library. Try again.');
+      }
+    },
+    removePhoto: () => edit((equipment) => ({
+      ...equipment,
+      imageUrl: undefined
+    })),
 
     // Existing equipment editing.
     setName: (name: string) =>
@@ -297,8 +324,8 @@ export function useEquipmentForm(
       chooseBranches(
         !id && branchIds.includes(toggled)
           ? branchIds.filter(
-              (branch) => branch !== toggled
-            )
+            (branch) => branch !== toggled
+          )
           : id
             ? [toggled]
             : [...branchIds, toggled]
@@ -409,10 +436,10 @@ export function useEquipmentForm(
             id
               ? clean
               : {
-                  ...clean,
-                  id: `${item.id}-${targetBranchId}`,
-                  branchId: targetBranchId,
-                }
+                ...clean,
+                id: `${item.id}-${targetBranchId}`,
+                branchId: targetBranchId,
+              }
           );
         }
 

@@ -27,7 +27,9 @@ export function formatTime(hhmm: string): string {
 }
 
 // Every half-hour start/end option, 5:00 AM to 11:30 PM.
-export const SCHEDULE_SLOTS = Array.from({ length: (LAST_SLOT_MIN - 5 * 60) / SCHEDULE_STEP_MIN + 1 }, (_, i) =>
+export const SCHEDULE_SLOTS = Array.from({
+  length: (LAST_SLOT_MIN - 5 * 60) / SCHEDULE_STEP_MIN + 1
+}, (_, i) =>
   fromMinutes(5 * 60 + i * SCHEDULE_STEP_MIN),
 );
 

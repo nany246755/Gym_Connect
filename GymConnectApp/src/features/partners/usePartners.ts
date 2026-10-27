@@ -1,12 +1,13 @@
+import { calculateCompatibility } from '@/logic/partner-matching';
 
 import { useMemo, useState } from 'react';
 
-import {
-  CURRENT_BRANCH_ID,
-  CURRENT_MEMBER_ID,
-  currentMember,
-  mockMembers,
-} from './mockMembers';
+import { useBranch } from '@/context/BranchContext';
+import { getBranchName } from '@/services/branch-service';
+import { useSavedProfile } from '@/hooks/use-saved-profile';
+import { toPartnerMember } from '@/logic/partner-profile';
+import { useSessionStore } from '@/hooks/use-session-store';
+import { partnerConnections, listPartnerMembers } from '@/services/partner-service';
 
 import type {
   GymMember,
@@ -24,105 +25,26 @@ const DEFAULT_FILTERS: PartnerFilters = {
   searchQuery: '',
 };
 
-// Calculate compatibility between two members.
-export function calculateCompatibility(
-  member: GymMember
-): number {
-  let score = 0;
-
-  // Training style: maximum 35 points.
-  const sharedStyles = member.trainingStyles.filter(style =>
-    currentMember.trainingStyles.includes(style)
-  );
-
-  if (sharedStyles.length > 0) {
-    score += 35;
-  }
-
-  // Training time: maximum 20 points.
-  if (
-    member.schedule.preferredTime ===
-    currentMember.schedule.preferredTime
-  ) {
-    score += 20;
-  }
-
-  // Training days: maximum 20 points.
-  const sharedDays = member.schedule.days.filter(day =>
-    currentMember.schedule.days.includes(day)
-  );
-
-  const totalDays = new Set([
-    ...member.schedule.days,
-    ...currentMember.schedule.days,
-  ]).size;
-
-  if (totalDays > 0) {
-    score += Math.round((sharedDays.length / totalDays) * 20);
-  }
-
-  // Fitness level: maximum 25 points.
-  if (member.fitnessLevel === currentMember.fitnessLevel) {
-    score += 25;
-  } else {
-    const levels = ['Beginner', 'Intermediate', 'Advanced'];
-
-    const memberLevel = levels.indexOf(member.fitnessLevel);
-    const currentLevel = levels.indexOf(currentMember.fitnessLevel);
-
-    if (Math.abs(memberLevel - currentLevel) === 1) {
-      score += 15;
-    }
-  }
-
-  return Math.min(score, 100);
-}
-
 export function usePartners() {
+  const profile = useSavedProfile();
+  const { preferredBranchId } = useBranch();
+  const branchName = getBranchName(preferredBranchId);
+  const currentMember = useMemo(() => toPartnerMember(profile), [profile]);
+  const CURRENT_MEMBER_ID = profile.id;
+  const CURRENT_BRANCH_ID = profile.homeBranchId;
   const [filters, setFilters] =
     useState<PartnerFilters>(DEFAULT_FILTERS);
 
-  // Temporary connections for testing the three tabs.
-  const [connections, setConnections] =
-    useState<PartnerConnection[]>(() => {
-      const now = Date.now();
-
-      return [
-        {
-          id: 'connection-jordan',
-          senderId: 'member-jordan',
-          receiverId: CURRENT_MEMBER_ID,
-          status: 'pending',
-          createdAt: now,
-          updatedAt: now,
-        },
-        {
-          id: 'connection-alex',
-          senderId: CURRENT_MEMBER_ID,
-          receiverId: 'member-alex',
-          status: 'pending',
-          createdAt: now,
-          updatedAt: now,
-        },
-        {
-          id: 'connection-maya',
-          senderId: CURRENT_MEMBER_ID,
-          receiverId: 'member-maya',
-          status: 'accepted',
-          createdAt: now,
-          updatedAt: now,
-        },
-      ];
-    });
+  const [connections, setConnections] = useSessionStore(partnerConnections);
 
   // Discover members at the correct branch.
   const discoverableMembers = useMemo(() => {
-    return mockMembers.filter(member =>
+    return listPartnerMembers().filter(member =>
       member.id !== CURRENT_MEMBER_ID &&
       member.branchId === CURRENT_BRANCH_ID &&
       member.discoverable
     );
-  }, []);
+  }, [CURRENT_MEMBER_ID, CURRENT_BRANCH_ID]);
 
   // Apply filters and sort by compatibility.
   const matchedMembers = useMemo<MemberMatch[]>(() => {
@@ -159,13 +81,13 @@ export function usePartners() {
     return filtered
       .map(member => ({
         member,
-        compatibilityScore: calculateCompatibility(member),
+        compatibilityScore: calculateCompatibility(member, currentMember),
       }))
       .sort(
         (a, b) =>
           b.compatibilityScore - a.compatibilityScore
       );
-  }, [discoverableMembers, filters]);
+  }, [discoverableMembers, filters, currentMember]);
 
   // Requests received from other members.
   const incomingRequests = connections.filter(
@@ -197,7 +119,7 @@ export function usePartners() {
       return currentMember;
     }
 
-    return mockMembers.find(member => member.id === memberId);
+    return listPartnerMembers().find(member => member.id === memberId);
   }
 
   // Find the connection between AJ and another member.
@@ -247,13 +169,13 @@ export function usePartners() {
     setConnections(previous =>
       previous.map(connection =>
         connection.id === connectionId &&
-        connection.receiverId === CURRENT_MEMBER_ID &&
-        connection.status === 'pending'
+          connection.receiverId === CURRENT_MEMBER_ID &&
+          connection.status === 'pending'
           ? {
-              ...connection,
-              status: 'accepted',
-              updatedAt: Date.now(),
-            }
+            ...connection,
+            status: 'accepted',
+            updatedAt: Date.now(),
+          }
           : connection
       )
     );
@@ -305,6 +227,7 @@ export function usePartners() {
 
   return {
     currentMember,
+    branchName,
     filters,
     setFilters,
     resetFilters,

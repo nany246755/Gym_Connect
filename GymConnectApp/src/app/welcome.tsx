@@ -25,7 +25,9 @@ export default function WelcomeScreen() {
       resizeMode="cover"
       style={styles.background}
     >
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={{
+        headerShown: false
+      }} />
 
       <StatusBar barStyle="light-content" />
 
@@ -104,10 +106,10 @@ const styles = StyleSheet.create({
 
   // Gym Connect centered above heading
   brandRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: 65,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 65,
   },
 
   brandAccent: {

@@ -8,17 +8,17 @@ import { initials } from '@/logic/profile';
 import { getBranchActivity } from '@/services/activity-service';
 import { getBranches } from '@/services/branch-service';
 import { listEquipment } from '@/services/equipment-service';
-import { getProfile } from '@/services/profile-service';
+import { useSavedProfile } from '@/hooks/use-saved-profile';
 import type { Branch } from '@/types/branch';
 import type { BranchActivity } from '@/types/branch-activity';
 import type { EquipmentStatus } from '@/types/equipment';
-import type { User } from '@/types/user';
+
 
 // ViewModel for the Member Dashboard: greeting, check-in status, equipment counts and branch
 // activity. Checking in and out happens on the Branch Selection screen.
 export function useMemberDashboard() {
   const { activeCheckIn, attendanceReady, preferredBranchId } = useBranch();
-  const [user, setUser] = useState<User | null>(null);
+  const user = useSavedProfile();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [counts, setCounts] = useState<Record<EquipmentStatus, number> | null>(null);
   const [activity, setActivity] = useState<BranchActivity[]>([]);
@@ -29,9 +29,8 @@ export function useMemberDashboard() {
   const branchId = activeCheckIn?.branchId ?? preferredBranchId;
 
   useEffect(() => {
-    Promise.all([getProfile(), getBranches()])
-      .then(([profile, list]) => {
-        setUser(profile);
+    getBranches()
+      .then((list) => {
         setBranches(list);
       })
       .catch(() => setError('Could not load your dashboard.'));
@@ -72,7 +71,10 @@ export function useMemberDashboard() {
       checkedIn: activeCheckIn !== null,
       checkedInSince: activeCheckIn ? clockTime(activeCheckIn.checkedInAt) : null,
       counts,
-      activity: activity.map((a) => ({ ...a, ago: timeAgo(a.at, now) })),
+      activity: activity.map((a) => ({
+        ...a,
+        ago: timeAgo(a.at, now)
+      })),
     },
     loading: !user || !branch || !counts || !attendanceReady,
     error,

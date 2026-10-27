@@ -26,14 +26,21 @@ export function BottomSheet({ visible, title, onClose, children, scrollRef }: Bo
         <Pressable
           accessibilityLabel="Close"
           onPress={onClose}
-          style={[StyleSheet.absoluteFill, { backgroundColor: theme.backdrop }]}
+          style={[StyleSheet.absoluteFill, {
+            backgroundColor: theme.backdrop
+          }]}
         />
         <View
           style={[
             styles.sheet,
-            { backgroundColor: theme.backgroundElement, paddingBottom: insets.bottom + Spacing.three },
+            {
+              backgroundColor: theme.backgroundElement,
+              paddingBottom: insets.bottom + Spacing.three
+            },
           ]}>
-          <View style={[styles.handle, { backgroundColor: theme.border }]} />
+          <View style={[styles.handle, {
+            backgroundColor: theme.border
+          }]} />
           {title && (
             <ThemedText type="smallBold" style={styles.title}>
               {title}
@@ -49,7 +56,10 @@ export function BottomSheet({ visible, title, onClose, children, scrollRef }: Bo
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end' },
+  root: {
+    flex: 1,
+    justifyContent: 'flex-end'
+  },
   sheet: {
     width: '100%',
     maxWidth: MaxContentWidth,
@@ -59,7 +69,19 @@ const styles = StyleSheet.create({
     borderTopRightRadius: Spacing.four,
     paddingTop: Spacing.two,
   },
-  handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.three },
-  title: { paddingHorizontal: Spacing.four, marginBottom: Spacing.two },
-  content: { paddingHorizontal: Spacing.four, gap: Spacing.two },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: Spacing.three
+  },
+  title: {
+    paddingHorizontal: Spacing.four,
+    marginBottom: Spacing.two
+  },
+  content: {
+    paddingHorizontal: Spacing.four,
+    gap: Spacing.two
+  },
 });

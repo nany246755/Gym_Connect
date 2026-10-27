@@ -23,11 +23,35 @@ export type MemberTab = 'home' | 'equipment' | 'spotter' | 'partners' | 'profile
 
 // Spotter has no symbol: it draws its own SpotterIcon. `path` is the screen each tab shows.
 const TABS: { key: MemberTab; label: string; path: string; icon?: IconName }[] = [
-  { key: 'home', label: 'Home', path: '/member/dashboard', icon: Icons.home },
-  { key: 'equipment', label: 'Equipment', path: '/member/equipment', icon: Icons.equipment },
-  { key: 'spotter', label: 'Spotter', path: '/member/spotting' },
-  { key: 'partners', label: 'Partners', path: '/member/partners', icon: Icons.partners },
-  { key: 'profile', label: 'Profile', path: '/member/profile', icon: Icons.profile },
+  {
+    key: 'home',
+    label: 'Home',
+    path: '/member/dashboard',
+    icon: Icons.home
+  },
+  {
+    key: 'equipment',
+    label: 'Equipment',
+    path: '/member/equipment',
+    icon: Icons.equipment
+  },
+  {
+    key: 'spotter',
+    label: 'Spotter',
+    path: '/member/spotting'
+  },
+  {
+    key: 'partners',
+    label: 'Partners',
+    path: '/member/partners',
+    icon: Icons.partners
+  },
+  {
+    key: 'profile',
+    label: 'Profile',
+    path: '/member/profile',
+    icon: Icons.profile
+  },
 ];
 
 // Shape of the bar: the active tab's circle floats DROP px above the bar's top edge, and the
@@ -38,7 +62,10 @@ const DROP = 14;
 const TOP = 32; // bar top edge, measured from the top of this component
 const BAR = 64; // bar height above the safe area
 const CORNER = 22;
-const SLIDE = { duration: 320, easing: Easing.out(Easing.cubic) };
+const SLIDE = {
+  duration: 320,
+  easing: Easing.out(Easing.cubic)
+};
 
 // Bar outline with a smooth notch under the circle at x = cx. Near a screen edge the notch
 // eats into the rounded corner, so the corner shrinks to fit. Runs on the UI thread while the
@@ -99,7 +126,7 @@ const OPEN: Record<MemberTab, () => void> = {
 };
 
 // Lets a screen hide the bar for a while (Profile's Save bar takes its place).
-const HideContext = createContext<(hidden: boolean) => void>(() => {});
+const HideContext = createContext<(hidden: boolean) => void>(() => { });
 
 export function useHideMemberTabBar(hidden: boolean) {
   const setHidden = useContext(HideContext);
@@ -150,8 +177,14 @@ function MemberTabBar({ active }: { active: MemberTab }) {
     }
   }, [index, width, reduceMotion, cx]);
 
-  const notch = useAnimatedProps(() => ({ d: barPath(width, height, cx.value) }));
-  const circle = useAnimatedStyle(() => ({ transform: [{ translateX: cx.value - CIRCLE / 2 }] }));
+  const notch = useAnimatedProps(() => ({
+    d: barPath(width, height, cx.value)
+  }));
+  const circle = useAnimatedStyle(() => ({
+    transform: [{
+      translateX: cx.value - CIRCLE / 2
+    }]
+  }));
 
   const icon = (t: (typeof TABS)[number], color: string, accent: string, size: number) =>
     t.icon ? (
@@ -162,7 +195,9 @@ function MemberTabBar({ active }: { active: MemberTab }) {
 
   return (
     <View
-      style={[styles.container, { height }]}
+      style={[styles.container, {
+        height
+      }]}
       onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
       accessibilityRole="tablist">
       {width > 0 && (
@@ -170,12 +205,18 @@ function MemberTabBar({ active }: { active: MemberTab }) {
           <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
             <AnimatedPath animatedProps={notch} fill={theme.navy} />
           </Svg>
-          <Animated.View style={[styles.circle, { backgroundColor: theme.marigold, shadowColor: theme.navy }, circle]}>
+          <Animated.View style={[styles.circle, {
+            backgroundColor: theme.marigold,
+            shadowColor: theme.navy
+          }, circle]}>
             {icon(current, theme.navy, theme.marigold, 28)}
           </Animated.View>
         </>
       )}
-      <View style={[styles.row, { top: TOP, paddingBottom: insets.bottom }]}>
+      <View style={[styles.row, {
+        top: TOP,
+        paddingBottom: insets.bottom
+      }]}>
         {TABS.map((t) => {
           const on = t.key === active;
           return (
@@ -184,7 +225,9 @@ function MemberTabBar({ active }: { active: MemberTab }) {
               style={styles.tab}
               onPress={on ? undefined : OPEN[t.key]}
               accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              accessibilityState={{
+                selected: on
+              }}
               accessibilityLabel={t.label}>
               {/* The active tab's icon is drawn in the floating circle instead; the one it
                   leaves fades back in as the circle slides away. */}
@@ -197,7 +240,9 @@ function MemberTabBar({ active }: { active: MemberTab }) {
               </View>
               <ThemedText
                 type={on ? 'smallBold' : 'small'}
-                style={[styles.label, { color: on ? theme.marigold : theme.heroSubtext }]}>
+                style={[styles.label, {
+                  color: on ? theme.marigold : theme.heroSubtext
+                }]}>
                 {t.label}
               </ThemedText>
             </Pressable>
@@ -212,8 +257,15 @@ function MemberTabBar({ active }: { active: MemberTab }) {
 export const MEMBER_TAB_BAR_SPACE = TOP + BAR + Spacing.three;
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  flex: {
+    flex: 1
+  },
+  container: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
   circle: {
     position: 'absolute',
     left: 0,
@@ -223,14 +275,38 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: {
+      width: 0,
+      height: 6
+    },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 8,
     zIndex: 1,
   },
-  row: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', alignItems: 'flex-end' },
-  tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'flex-end', gap: Spacing.one, paddingBottom: Spacing.three },
-  iconSlot: { height: 28, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: 12, lineHeight: 16 },
+  row: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'flex-end'
+  },
+  tab: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: Spacing.one,
+    paddingBottom: Spacing.three
+  },
+  iconSlot: {
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  label: {
+    fontSize: 12,
+    lineHeight: 16
+  },
 });

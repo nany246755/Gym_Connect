@@ -11,7 +11,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mockUserBranchName } from '@/data/mock-user';
 import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedSpottingRequests } from '../../../features/spotting/SpottingRequestsProvider';
@@ -27,13 +26,18 @@ const EQUIPMENT = [
 export default function CreateSpotRequestScreen() {
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { createRequest, myActiveRequest } = useSharedSpottingRequests();
+  const { createRequest, myActiveRequest, canRequestSpot, attendanceReady, branchName } = useSharedSpottingRequests();
   const [exercise, setExercise] = useState('');
   const [location, setLocation] = useState('');
   const [weight, setWeight] = useState('');
   const [selector, setSelector] = useState<'exercise' | 'location' | null>(null);
 
   function submitRequest() {
+    if (!attendanceReady) return;
+    if (!canRequestSpot) {
+      router.push('/member/branch');
+      return;
+    }
     if (!exercise || !location) {
       Alert.alert('Missing information', 'Please select an exercise and equipment location.');
       return;
@@ -55,7 +59,12 @@ export default function CreateSpotRequestScreen() {
     }
 
     // Open the shared request tracker after successful creation.
-    router.replace({ pathname: '/member/spotting', params: { tab: 'mine' } });
+    router.replace({
+      pathname: '/member/spotting',
+      params: {
+        tab: 'mine'
+      }
+    });
   }
 
   const options = selector === 'exercise' ? EXERCISES : EQUIPMENT;
@@ -106,7 +115,7 @@ export default function CreateSpotRequestScreen() {
         </Pressable>
 
         <View style={styles.infoPanel}>
-          <Text style={styles.infoTitle}>⌖  {mockUserBranchName} Branch</Text>
+          <Text style={styles.infoTitle}>{branchName || 'Check-in required'}</Text>
           <Text style={styles.infoText}>Only eligible members at this branch can accept your request.</Text>
           <Text style={styles.infoTitle}>◷  Expires after 2 minutes</Text>
           <Text style={styles.infoText}>If nobody accepts, you can create another request.</Text>
@@ -115,11 +124,11 @@ export default function CreateSpotRequestScreen() {
         <Pressable
           style={[styles.submit, !!myActiveRequest && styles.disabled]}
           onPress={submitRequest}
-          disabled={!!myActiveRequest}
+          disabled={!attendanceReady || !!myActiveRequest}
           accessibilityRole="button"
         >
           <Text style={styles.submitText}>
-            {myActiveRequest ? 'Request already active' : 'Request a spotter'}
+            {!attendanceReady ? 'Loading check-in…' : !canRequestSpot ? 'Check in to request a spotter' : myActiveRequest ? 'Request already active' : 'Request a spotter'}
           </Text>
         </Pressable>
       </ScrollView>
@@ -152,28 +161,134 @@ export default function CreateSpotRequestScreen() {
 }
 
 const createStyles = (colors: ReturnType<typeof useTheme>) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 22, paddingBottom: 50 },
-  back: { alignSelf: 'flex-start', paddingVertical: 12, marginBottom: 15 },
-  backText: { color: colors.text, fontWeight: '700', fontSize: 14 },
-  title: { color: colors.text, fontSize: 29, fontWeight: '800', marginBottom: 12 },
-  description: { color: colors.textSecondary, fontSize: 14, lineHeight: 21, marginBottom: 20 },
-  label: { color: colors.text, fontSize: 13, fontWeight: '700', marginTop: 13, marginBottom: 9 },
-  field: { minHeight: 54, backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.border, borderRadius: 13, paddingHorizontal: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', color: colors.text, fontSize: 15 },
-  fieldText: { color: colors.text, fontSize: 14, flexShrink: 1 },
-  placeholder: { color: colors.textSecondary },
-  chevron: { color: colors.textSecondary, fontSize: 23 },
-  infoPanel: { backgroundColor: colors.accentSoft, borderRadius: 14, padding: 16, marginTop: 25, gap: 7 },
-  infoTitle: { color: colors.text, fontSize: 14, fontWeight: '800' },
-  infoText: { color: colors.textSecondary, fontSize: 12, lineHeight: 18, marginBottom: 8 },
-  submit: { backgroundColor: colors.primary, paddingVertical: 17, borderRadius: 14, marginTop: 22, alignItems: 'center' },
-  submitText: { color: colors.onPrimary, fontWeight: '800', fontSize: 15 },
-  disabled: { opacity: 0.45 },
-  overlay: { flex: 1, backgroundColor: colors.backdrop, justifyContent: 'center', padding: 22 },
-  modal: { backgroundColor: colors.backgroundElement, borderRadius: 20, padding: 18, gap: 9 },
-  modalTitle: { color: colors.text, fontWeight: '800', fontSize: 18, marginBottom: 7 },
-  option: { backgroundColor: colors.background, padding: 14, borderRadius: 11 },
-  optionText: { color: colors.text, fontWeight: '600' },
-  close: { alignItems: 'center', paddingVertical: 12 },
-  closeText: { color: colors.textSecondary, fontWeight: '700' },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background
+  },
+  content: {
+    padding: 22,
+    paddingBottom: 50
+  },
+  back: {
+    alignSelf: 'flex-start',
+    paddingVertical: 12,
+    marginBottom: 15
+  },
+  backText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 14
+  },
+  title: {
+    color: colors.text,
+    fontSize: 29,
+    fontWeight: '800',
+    marginBottom: 12
+  },
+  description: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 20
+  },
+  label: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 13,
+    marginBottom: 9
+  },
+  field: {
+    minHeight: 54,
+    backgroundColor: colors.backgroundElement,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 13,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    color: colors.text,
+    fontSize: 15
+  },
+  fieldText: {
+    color: colors.text,
+    fontSize: 14,
+    flexShrink: 1
+  },
+  placeholder: {
+    color: colors.textSecondary
+  },
+  chevron: {
+    color: colors.textSecondary,
+    fontSize: 23
+  },
+  infoPanel: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 25,
+    gap: 7
+  },
+  infoTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800'
+  },
+  infoText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 8
+  },
+  submit: {
+    backgroundColor: colors.primary,
+    paddingVertical: 17,
+    borderRadius: 14,
+    marginTop: 22,
+    alignItems: 'center'
+  },
+  submitText: {
+    color: colors.onPrimary,
+    fontWeight: '800',
+    fontSize: 15
+  },
+  disabled: {
+    opacity: 0.45
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: colors.backdrop,
+    justifyContent: 'center',
+    padding: 22
+  },
+  modal: {
+    backgroundColor: colors.backgroundElement,
+    borderRadius: 20,
+    padding: 18,
+    gap: 9
+  },
+  modalTitle: {
+    color: colors.text,
+    fontWeight: '800',
+    fontSize: 18,
+    marginBottom: 7
+  },
+  option: {
+    backgroundColor: colors.background,
+    padding: 14,
+    borderRadius: 11
+  },
+  optionText: {
+    color: colors.text,
+    fontWeight: '600'
+  },
+  close: {
+    alignItems: 'center',
+    paddingVertical: 12
+  },
+  closeText: {
+    color: colors.textSecondary,
+    fontWeight: '700'
+  },
 });

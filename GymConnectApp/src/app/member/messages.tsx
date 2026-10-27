@@ -1,10 +1,12 @@
+import { useSavedProfile } from '@/hooks/use-saved-profile';
+import { initials } from '@/logic/profile';
 // Gym Connect - FR08 Messages
 // Conversations List + Individual Chat
 import {
   router,
   useLocalSearchParams,
 } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   FlatList,
@@ -47,14 +49,14 @@ const C = {
 };
 
 const MEMBER_NAMES: Record<string, string> = {
-  'member-aj': mockUser.fullName, // the signed-in member, same as My Profile
+  'user-andro': mockUser.fullName, // the signed-in member, same as My Profile
   'member-maya': 'Maya Brooks',
   'member-omar': 'Omar Hassan',
   'member-jordan': 'Jordan Lee',
   'member-sarah': 'Sarah Ahmed',
   'member-alex': 'Alex Rivera',
 };
-type DemoMemberId = 'member-aj' | 'member-maya';
+type DemoMemberId = 'user-andro' | 'member-maya';
 
 interface ConversationItem {
   conversation: Conversation;
@@ -68,19 +70,6 @@ interface ConversationItem {
 // ==========================================
 // HELPER FUNCTIONS
 // ==========================================
-
-function memberName(id: string): string {
-  return MEMBER_NAMES[id] ?? id;
-}
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0] ?? '')
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 function formatTime(value?: string): string {
   if (!value) return '';
@@ -100,10 +89,12 @@ function formatTime(value?: string): string {
 // ==========================================
 
 function MessagesContent() {
+  const profile = useSavedProfile();
+  const memberName = useCallback((id: string) => id === profile.id ? profile.fullName : MEMBER_NAMES[id] ?? id, [profile.id, profile.fullName]);
   const { partnerId: requestedPartnerId } =
-  useLocalSearchParams<{
-    partnerId?: string;
-  }>();
+    useLocalSearchParams<{
+      partnerId?: string;
+    }>();
 
   const {
     conversations,
@@ -121,7 +112,7 @@ function MessagesContent() {
   // We will remove this during integration.
 
   const [currentMemberId, setCurrentMemberId] =
-    useState<DemoMemberId>('member-aj');
+    useState<DemoMemberId>('user-andro');
 
   const [search, setSearch] = useState('');
 
@@ -134,55 +125,52 @@ function MessagesContent() {
 
   const handledPartnerRef = useRef<string | null>(null);
 
-  // Opening Messages from the Partners shortcut should show the inbox,
-  // even if this screen previously displayed an individual conversation.
+  // ==========================================
+  // ==========================================
+  // OPEN CHAT FROM WORKOUT PARTNERS
+  // ==========================================
+
   useEffect(() => {
-    if (!requestedPartnerId) {
-      handledPartnerRef.current = null;
-      setSelectedConversationId(null);
-      setMessageText('');
+    if (
+      !requestedPartnerId ||
+      handledPartnerRef.current === requestedPartnerId
+    ) {
+      return;
     }
-  }, [requestedPartnerId]);
 
-  // ==========================================
-  // ==========================================
-// OPEN CHAT FROM WORKOUT PARTNERS
-// ==========================================
+    // Find an existing conversation or create
+    // an empty one if the members are connected.
 
-useEffect(() => {
-  if (
-    !requestedPartnerId ||
-    handledPartnerRef.current === requestedPartnerId
-  ) {
-    return;
-  }
+    let active = true;
+    Promise.resolve().then(() => {
+      if (!active) return;
+      const conversation = getOrCreateConversation(
+        'user-andro',
+        requestedPartnerId
+      );
 
-  // Find an existing conversation or create
-  // an empty one if the members are connected.
+      if (!conversation) {
+        return;
+      }
 
-  const conversation = getOrCreateConversation(
-    'member-aj',
-    requestedPartnerId
-  );
+      handledPartnerRef.current = requestedPartnerId;
 
-  if (!conversation) {
-    return;
-  }
+      // Return to the signed-in member when opening a conversation
+      // from their Workout Partners screen.
 
-  handledPartnerRef.current = requestedPartnerId;
+      setCurrentMemberId('user-andro');
 
-  // Return to the signed-in member when opening a conversation
-  // from their Workout Partners screen.
+      setSelectedConversationId(conversation.id);
 
-  setCurrentMemberId('member-aj');
-
-  setSelectedConversationId(conversation.id);
-
-  setMessageText('');
-}, [
-  requestedPartnerId,
-  getOrCreateConversation,
-]);
+      setMessageText('');
+    });
+    return () => {
+      active = false;
+    };
+  }, [
+    requestedPartnerId,
+    getOrCreateConversation,
+  ]);
   // BUILD CONVERSATION LIST
   // ==========================================
 
@@ -242,6 +230,7 @@ useEffect(() => {
       currentMemberId,
       getUnreadCount,
       isConnected,
+      memberName,
     ]
   );
 
@@ -274,9 +263,9 @@ useEffect(() => {
 
   const unreadInOpenChat = selectedConversationId
     ? getUnreadCount(
-        selectedConversationId,
-        currentMemberId
-      )
+      selectedConversationId,
+      currentMemberId
+    )
     : 0;
 
   // ==========================================
@@ -320,10 +309,10 @@ useEffect(() => {
     setSearch('');
 
     setCurrentMemberId((previous) =>
-  previous === 'member-aj'
-    ? 'member-maya'
-    : 'member-aj'
-);
+      previous === 'user-andro'
+        ? 'member-maya'
+        : 'user-andro'
+    );
   }
 
   function handleSendMessage() {
@@ -462,11 +451,11 @@ useEffect(() => {
 
           {!canSend && (
             <View style={styles.disconnectNotice}>
-             <Text style={styles.disconnectNoticeText}>
-            You are no longer connected. Your chat
-            history is available, but you cannot
-            send new messages.
-            </Text>
+              <Text style={styles.disconnectNoticeText}>
+                You are no longer connected. Your chat
+                history is available, but you cannot
+                send new messages.
+              </Text>
             </View>
           )}
 
@@ -500,8 +489,8 @@ useEffect(() => {
                 <Text style={styles.emptyChatDescription}>
                   {canSend
                     ? `Say hello to ${memberName(
-                        partnerId
-                      )}!`
+                      partnerId
+                    )}!`
                     : 'No messages in this conversation.'}
                 </Text>
               </View>
@@ -539,7 +528,7 @@ useEffect(() => {
               style={[
                 styles.sendButton,
                 (!canSend || !messageText.trim()) &&
-                  styles.sendButtonDisabled,
+                styles.sendButtonDisabled,
               ]}
             >
               <Text style={styles.sendButtonText}>
@@ -600,14 +589,13 @@ useEffect(() => {
               style={[
                 styles.messagePreview,
                 item.unreadCount > 0 &&
-                  styles.unreadPreview,
+                styles.unreadPreview,
               ]}
               numberOfLines={1}
             >
               {item.lastMessage
-                ? `${
-                    isOwnLastMessage ? 'You: ' : ''
-                  }${item.lastMessage.text}`
+                ? `${isOwnLastMessage ? 'You: ' : ''
+                }${item.lastMessage.text}`
                 : 'Start a conversation'}
             </Text>
 
@@ -654,14 +642,14 @@ useEffect(() => {
         <View style={styles.headerRight}>
           {getTotalUnreadCount(currentMemberId) >
             0 && (
-            <View style={styles.headerUnread}>
-              <Text style={styles.headerUnreadText}>
-                {getTotalUnreadCount(
-                  currentMemberId
-                )}
-              </Text>
-            </View>
-          )}
+              <View style={styles.headerUnread}>
+                <Text style={styles.headerUnreadText}>
+                  {getTotalUnreadCount(
+                    currentMemberId
+                  )}
+                </Text>
+              </View>
+            )}
 
           {/* TEMPORARY TEST CONTROL */}
 
@@ -672,12 +660,12 @@ useEffect(() => {
             accessibilityLabel="Switch demo member"
           >
             <Text style={styles.demoSwitchText}>
-              {firstName(MEMBER_NAMES[currentMemberId]).toUpperCase()} ⇄
+              {firstName(memberName(currentMemberId)).toUpperCase()} ⇄
             </Text>
           </Pressable>
         </View>
       </View>
-      
+
 
       {/* CONVERSATION HEADING + SHORTCUT */}
       <View style={styles.sectionHeading}>
@@ -751,7 +739,8 @@ useEffect(() => {
 // ==========================================
 
 export default function MessagesScreen() {
-  return <MessagesContent />;
+  const { partnerId } = useLocalSearchParams<{ partnerId?: string }>();
+  return <MessagesContent key={partnerId ?? 'inbox'} />;
 }
 
 // ==========================================

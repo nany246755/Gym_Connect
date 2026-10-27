@@ -41,16 +41,28 @@ export function start(s: RestTimerState, now: number): RestTimerState {
 
 export function pause(s: RestTimerState, now: number): RestTimerState {
   if (s.endsAt === null) return s;
-  return { ...s, endsAt: null, pausedRemainingMs: Math.max(0, s.endsAt - now) };
+  return {
+    ...s,
+    endsAt: null,
+    pausedRemainingMs: Math.max(0, s.endsAt - now)
+  };
 }
 
 export function reset(s: RestTimerState): RestTimerState {
-  return { ...s, endsAt: null, pausedRemainingMs: null, totalMs: s.durationSec * 1000 };
+  return {
+    ...s,
+    endsAt: null,
+    pausedRemainingMs: null,
+    totalMs: s.durationSec * 1000
+  };
 }
 
 // The rest finishes: the current visit advances to the next set.
 export function finish(s: RestTimerState): RestTimerState {
-  return { ...reset(s), setNumber: s.setNumber + 1 };
+  return {
+    ...reset(s),
+    setNumber: s.setNumber + 1
+  };
 }
 
 // The timer belongs to one attendance session. A DIFFERENT session — including
@@ -58,30 +70,52 @@ export function finish(s: RestTimerState): RestTimerState {
 // to the selected duration and Set 1. Preferences remain unchanged.
 export function syncCheckIn(s: RestTimerState, checkInId: string | null): RestTimerState {
   if (s.checkInId === checkInId) return s;
-  return { ...reset(s), checkInId, setNumber: 1 };
+  return {
+    ...reset(s),
+    checkInId,
+    setNumber: 1
+  };
 }
 
 // Always reset after a confirmed checkout, even if the timer was unbound.
 export function resetAfterCheckout(s: RestTimerState): RestTimerState {
-  return { ...reset(s), checkInId: null, setNumber: 1 };
+  return {
+    ...reset(s),
+    checkInId: null,
+    setNumber: 1
+  };
 }
 
 export function selectPreset(s: RestTimerState, durationSec: number): RestTimerState {
-  return reset({ ...s, durationSec });
+  return reset({
+    ...s,
+    durationSec
+  });
 }
 
 export function adjust(s: RestTimerState, deltaSec: number, now: number): RestTimerState {
   const deltaMs = deltaSec * 1000;
   if (s.endsAt !== null) {
     const endsAt = Math.max(now + 1000, s.endsAt + deltaMs);
-    return { ...s, endsAt, totalMs: Math.max(s.totalMs, endsAt - now) };
+    return {
+      ...s,
+      endsAt,
+      totalMs: Math.max(s.totalMs, endsAt - now)
+    };
   }
   if (s.pausedRemainingMs !== null) {
     const pausedRemainingMs = Math.max(1000, s.pausedRemainingMs + deltaMs);
-    return { ...s, pausedRemainingMs, totalMs: Math.max(s.totalMs, pausedRemainingMs) };
+    return {
+      ...s,
+      pausedRemainingMs,
+      totalMs: Math.max(s.totalMs, pausedRemainingMs)
+    };
   }
   const durationSec = Math.min(MAX_DURATION_SEC, Math.max(MIN_DURATION_SEC, s.durationSec + deltaSec));
-  return reset({ ...s, durationSec });
+  return reset({
+    ...s,
+    durationSec
+  });
 }
 
 export function formatClock(ms: number): string {

@@ -20,7 +20,7 @@ export function scheduleLine(user: Pick<User, 'scheduleDays' | 'scheduleFrom' | 
   const today = (now.getDay() + 6) % 7; // Monday = 0
   const time = `${formatTime(user.scheduleFrom)} – ${formatTime(user.scheduleTo)}`;
   if (user.scheduleDays.includes(WEEK_DAYS[today])) return `${DAY_NAMES[today]} is a training day · ${time}`;
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1;i <= 7;i++) {
     const day = (today + i) % 7;
     if (user.scheduleDays.includes(WEEK_DAYS[day])) return `Rest day · next workout ${DAY_NAMES[day]}`;
   }

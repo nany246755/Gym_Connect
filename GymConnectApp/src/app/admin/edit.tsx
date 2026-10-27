@@ -50,6 +50,8 @@ export default function EquipmentFormScreen() {
     setStatus,
     pickPhoto,
     removePhoto,
+    setFloorPlacementEnabled,
+    setFloorPlacementField,
     save,
   } = useEquipmentForm(id, branchId);
 
@@ -86,7 +88,10 @@ export default function EquipmentFormScreen() {
       <StatusBar style="light" />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={[styles.hero, { backgroundColor: theme.hero, paddingTop: insets.top + Spacing.three }]}>
+          <View style={[styles.hero, {
+            backgroundColor: theme.hero,
+            paddingTop: insets.top + Spacing.three
+          }]}>
             <View style={[styles.inner, styles.row]}>
               <Pressable
                 accessibilityRole="button"
@@ -97,13 +102,19 @@ export default function EquipmentFormScreen() {
                 <SymbolView name={Icons.back} size={22} tintColor={theme.heroText} />
               </Pressable>
               <View style={styles.flex}>
-                <ThemedText type="smallBold" style={[styles.caps, { color: theme.accent }]}>
+                <ThemedText type="smallBold" style={[styles.caps, {
+                  color: theme.accent
+                }]}>
                   GYM CONNECT / ADMIN
                 </ThemedText>
-                <ThemedText type="subtitle" style={[styles.title, { color: theme.heroText }]}>
+                <ThemedText type="subtitle" style={[styles.title, {
+                  color: theme.heroText
+                }]}>
                   {data.isNew ? 'Add equipment' : 'Edit equipment'}
                 </ThemedText>
-                <ThemedText type="small" style={{ color: theme.heroSubtext }}>
+                <ThemedText type="small" style={{
+                  color: theme.heroSubtext
+                }}>
                   {item.name.trim() || 'New equipment'} · {branchName}
                 </ThemedText>
               </View>
@@ -112,7 +123,9 @@ export default function EquipmentFormScreen() {
 
           <View style={[styles.inner, styles.body]}>
             <Card>
-              <View style={[styles.photo, { backgroundColor: theme.accentSoft }]}>
+              <View style={[styles.photo, {
+                backgroundColor: theme.accentSoft
+              }]}>
                 {data.image ? (
                   <Image
                     source={data.image}
@@ -239,7 +252,10 @@ export default function EquipmentFormScreen() {
                   accessibilityLabel="Enable equipment floor position"
                   value={item.floorPlacement !== undefined}
                   onValueChange={setFloorPlacementEnabled}
-                  trackColor={{ false: theme.border, true: theme.primary }}
+                  trackColor={{
+                    false: theme.border,
+                    true: theme.primary
+                  }}
                   thumbColor={theme.backgroundElement}
                   ios_backgroundColor={theme.border}
                 />
@@ -290,7 +306,9 @@ export default function EquipmentFormScreen() {
                       />
                     </View>
                   </View>
-                  <View style={[styles.placementSummary, { backgroundColor: theme.backgroundSelected }]}>
+                  <View style={[styles.placementSummary, {
+                    backgroundColor: theme.backgroundSelected
+                  }]}>
                     <ThemedText type="smallBold">
                       Row {item.floorPlacement.row}, Column {item.floorPlacement.column}
                     </ThemedText>
@@ -308,7 +326,9 @@ export default function EquipmentFormScreen() {
             </Card>
 
             {error && (
-              <ThemedText type="small" style={{ color: theme.danger }} accessibilityRole="alert">
+              <ThemedText type="small" style={{
+                color: theme.danger
+              }} accessibilityRole="alert">
                 {error}
               </ThemedText>
             )}
@@ -320,7 +340,11 @@ export default function EquipmentFormScreen() {
           <View
             style={[
               styles.saveBar,
-              { backgroundColor: theme.backgroundElement, borderColor: theme.border, paddingBottom: insets.bottom + Spacing.three },
+              {
+                backgroundColor: theme.backgroundElement,
+                borderColor: theme.border,
+                paddingBottom: insets.bottom + Spacing.three
+              },
             ]}>
             <Button variant="secondary" title="Cancel" onPress={leave} style={styles.flex} />
             <Button
@@ -399,7 +423,10 @@ export default function EquipmentFormScreen() {
 function Card({ children }: { children: ReactNode }) {
   const theme = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>{children}</View>
+    <View style={[styles.card, {
+      backgroundColor: theme.backgroundElement,
+      borderColor: theme.border
+    }]}>{children}</View>
   );
 }
 
@@ -412,7 +439,9 @@ function Field({ label, error, children }: { label: string; error?: string; chil
       </ThemedText>
       {children}
       {error && (
-        <ThemedText type="small" style={{ color: theme.danger }} accessibilityRole="alert">
+        <ThemedText type="small" style={{
+          color: theme.danger
+        }} accessibilityRole="alert">
           {error}
         </ThemedText>
       )}
@@ -428,7 +457,10 @@ function Select({ value, label, onPress }: { value: string; label: string; onPre
       accessibilityRole="button"
       accessibilityLabel={`${label} ${value}, change`}
       onPress={onPress}
-      style={[styles.input, styles.select, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[styles.input, styles.select, {
+        backgroundColor: theme.backgroundElement,
+        borderColor: theme.border
+      }]}>
       <ThemedText style={styles.flex} numberOfLines={1}>
         {value}
       </ThemedText>
@@ -455,13 +487,17 @@ function PositionStepper({
   return (
     <View style={styles.stepperGroup}>
       <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
-      <View style={[styles.stepper, { borderColor: theme.border }]}>
+      <View style={[styles.stepper, {
+        borderColor: theme.border
+      }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Decrease ${label}`}
           disabled={value <= min}
           onPress={() => onChange(value - 1)}
-          style={[styles.stepperButton, { opacity: value <= min ? 0.3 : 1 }]}>
+          style={[styles.stepperButton, {
+            opacity: value <= min ? 0.3 : 1
+          }]}>
           <ThemedText type="smallBold" style={styles.stepperSymbol}>−</ThemedText>
         </Pressable>
         <ThemedText type="smallBold" style={styles.stepperValue}>{value}</ThemedText>
@@ -470,7 +506,9 @@ function PositionStepper({
           accessibilityLabel={`Increase ${label}`}
           disabled={value >= max}
           onPress={() => onChange(value + 1)}
-          style={[styles.stepperButton, { opacity: value >= max ? 0.3 : 1 }]}>
+          style={[styles.stepperButton, {
+            opacity: value >= max ? 0.3 : 1
+          }]}>
           <ThemedText type="smallBold" style={styles.stepperSymbol}>+</ThemedText>
         </Pressable>
       </View>
@@ -479,24 +517,67 @@ function PositionStepper({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centered: { alignItems: 'center', justifyContent: 'center' },
-  flex: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  inner: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center', paddingHorizontal: Spacing.three },
-  caps: { letterSpacing: 1 },
-  scroll: { paddingBottom: Spacing.five },
+  container: {
+    flex: 1
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  flex: {
+    flex: 1
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  wrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two
+  },
+  inner: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.three
+  },
+  caps: {
+    letterSpacing: 1
+  },
+  scroll: {
+    paddingBottom: Spacing.five
+  },
   hero: {
     paddingBottom: Spacing.four,
     borderBottomLeftRadius: Spacing.five,
     borderBottomRightRadius: Spacing.five,
   },
-  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start' },
-  title: { fontSize: 26, lineHeight: 34 },
-  body: { gap: Spacing.three, marginTop: Spacing.three },
-  card: { borderWidth: 1, borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.three },
-  field: { gap: Spacing.one },
+  back: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start'
+  },
+  title: {
+    fontSize: 26,
+    lineHeight: 34
+  },
+  body: {
+    gap: Spacing.three,
+    marginTop: Spacing.three
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.three
+  },
+  field: {
+    gap: Spacing.one
+  },
   photo: {
     height: 180,
     borderRadius: Spacing.three,
@@ -504,7 +585,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  photoImage: { width: '100%', height: '100%' },
+  photoImage: {
+    width: '100%',
+    height: '100%'
+  },
   input: {
     minHeight: 48,
     borderWidth: 1,
@@ -512,10 +596,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
-  select: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  zoneColumn: { flex: 1.5 },
-  third: { flexGrow: 1, flexBasis: '30%' },
-  half: { flexGrow: 1, flexBasis: '45%' },
+  select: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  zoneColumn: {
+    flex: 1.5
+  },
+  third: {
+    flexGrow: 1,
+    flexBasis: '30%'
+  },
+  half: {
+    flexGrow: 1,
+    flexBasis: '45%'
+  },
   saveBar: {
     flexDirection: 'row',
     gap: Spacing.two,
@@ -523,12 +619,24 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     paddingHorizontal: Spacing.three,
   },
-  saveButton: { flex: 2 },
-  sheetOption: { justifyContent: 'flex-start' },
+  saveButton: {
+    flex: 2
+  },
+  sheetOption: {
+    justifyContent: 'flex-start'
+  },
   // Only the new floor-position section uses these styles.
-  floorSettings: { gap: Spacing.three },
-  placementSummary: { borderRadius: Spacing.two, padding: Spacing.three, gap: Spacing.one },
-  stepperGroup: { gap: Spacing.one },
+  floorSettings: {
+    gap: Spacing.three
+  },
+  placementSummary: {
+    borderRadius: Spacing.two,
+    padding: Spacing.three,
+    gap: Spacing.one
+  },
+  stepperGroup: {
+    gap: Spacing.one
+  },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -537,7 +645,18 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.two,
     overflow: 'hidden',
   },
-  stepperButton: { width: 40, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  stepperSymbol: { fontSize: 20 },
-  stepperValue: { flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  stepperButton: {
+    width: 40,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  stepperSymbol: {
+    fontSize: 20
+  },
+  stepperValue: {
+    flex: 1,
+    textAlign: 'center',
+    fontVariant: ['tabular-nums']
+  },
 });

@@ -3,7 +3,11 @@ import { Appearance } from 'react-native';
 
 import type { AppearanceMode } from '@/types/settings';
 
-const SCHEME = { Default: 'unspecified', Light: 'light', Dark: 'dark' } as const;
+const SCHEME = {
+  Default: 'unspecified',
+  Light: 'light',
+  Dark: 'dark'
+} as const;
 
 // The app's own Light/Dark/Default choice. RN's Appearance.setColorScheme() does not notify
 // useColorScheme() listeners itself (it waits for a native event Expo Go doesn't always send),

@@ -1,5 +1,4 @@
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getEquipment } from '@/services/equipment-service';
 
@@ -36,8 +35,8 @@ export type SubmitEquipmentReportInput = {
   note?: string;
 };
 
-// Separate storage from the equipment inventory.
-const REPORTS_STORAGE_KEY = 'equipment_status_reports';
+// Reports share the inventory's session-only mock storage model.
+let reports: EquipmentStatusReport[] = [];
 
 export const MAX_EQUIPMENT_REPORT_NOTE_LENGTH = 250;
 
@@ -45,26 +44,8 @@ export const MAX_EQUIPMENT_REPORT_NOTE_LENGTH = 250;
 export async function listEquipmentReports(
   equipmentId?: string
 ): Promise<EquipmentStatusReport[]> {
-  const stored = await AsyncStorage.getItem(
-    REPORTS_STORAGE_KEY
-  );
-
-  if (!stored) {
-    return [];
-  }
-
-  const parsed: unknown = JSON.parse(stored);
-
-  if (!Array.isArray(parsed)) {
-    throw new Error(
-      'Stored equipment reports are invalid.'
-    );
-  }
-
-  const reports = parsed as EquipmentStatusReport[];
-
   if (!equipmentId) {
-    return reports;
+    return [...reports];
   }
 
   return reports.filter(
@@ -131,18 +112,7 @@ export async function submitEquipmentReport(
     reviewStatus: 'Pending',
   };
 
-  // Read existing reports.
-  const existingReports =
-    await listEquipmentReports();
-
-  // Save the new report alongside older reports.
-  await AsyncStorage.setItem(
-    REPORTS_STORAGE_KEY,
-    JSON.stringify([
-      ...existingReports,
-      report,
-    ])
-  );
+  reports = [...reports, report];
 
   return report;
 }

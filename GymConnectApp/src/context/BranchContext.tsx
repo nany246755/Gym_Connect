@@ -54,7 +54,9 @@ export function BranchProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         if (mounted) setAttendanceReady(true);
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Preferred branch remains independent of active attendance.
@@ -64,8 +66,10 @@ export function BranchProvider({ children }: { children: ReactNode }) {
       .then((user) => {
         if (mounted) setPreferredBranchId(user.homeBranchId);
       })
-      .catch(() => {});
-    return () => { mounted = false; };
+      .catch(() => { });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Reconcile a restored timer with the restored attendance. This also
@@ -73,7 +77,7 @@ export function BranchProvider({ children }: { children: ReactNode }) {
   // device shutdown prevented the timer reset from being saved.
   useEffect(() => {
     if (!attendanceReady || !timerReady) return;
-    void syncSession(activeCheckIn?.checkedInAt ?? null).catch(() => {});
+    void syncSession(activeCheckIn?.checkedInAt ?? null).catch(() => { });
   }, [attendanceReady, timerReady, activeCheckIn?.checkedInAt, syncSession]);
 
   const startDemoCheckIn = async (branchId: string): Promise<boolean> => {
@@ -90,7 +94,7 @@ export function BranchProvider({ children }: { children: ReactNode }) {
       activeRef.current = session;
       setActiveCheckIn(session);
       // A new gym visit starts Set 1 and cancels any leftover rest.
-      void syncSession(session.checkedInAt).catch(() => {});
+      void syncSession(session.checkedInAt).catch(() => { });
       return true;
     } catch {
       return false;

@@ -2,49 +2,40 @@
 import { useEffect, useState } from 'react';
 
 import { mockUser } from '@/data/mock-user';
+import { useBranch } from '@/context/BranchContext';
+import { getBranchName } from '@/services/branch-service';
+import { spottingRequests, REQUEST_DURATION } from '@/services/spotting-service';
+import { useSessionStore } from '@/hooks/use-session-store';
+import { useSavedProfile } from '@/hooks/use-saved-profile';
 import { firstName } from '@/logic/dashboard';
+import { canUseSpotting, expireSpottingRequests } from '@/logic/spotting';
 
 import type {
   CancellationReason,
   SpottingRequest,
 } from './types';
 
-const REQUEST_DURATION = 2 * 60 * 1000;
-// The signed-in member's home branch, from the same mock user as My Profile.
-const CURRENT_BRANCH_ID = mockUser.homeBranchId;
 
-// 'member-2' is the signed-in member (shown by their first name); Omar is the test member.
+// 'user-andro' is the signed-in member (shown by their first name); Omar is the test member.
 export const DEMO_MEMBERS = {
-  'member-2': firstName(mockUser.fullName),
+  'user-andro': firstName(mockUser.fullName),
   'member-omar': 'Omar',
 };
 
 type DemoMemberId = keyof typeof DEMO_MEMBERS;
 
 export function useSpottingRequests() {
+  const profile = useSavedProfile();
+  const { activeCheckIn, attendanceReady } = useBranch();
+  const branchId = activeCheckIn?.branchId;
+  const canRequestSpot = canUseSpotting(attendanceReady, branchId);
+  const branchName = getBranchName(branchId);
   const [currentUserId, setCurrentUserId] =
-    useState<DemoMemberId>('member-2');
+    useState<DemoMemberId>('user-andro');
 
-  // One temporary request from Omar.
-  const [requests, setRequests] = useState<SpottingRequest[]>(() => {
-    const createdAt = Date.now();
+  const [requests, setRequests] = useSessionStore(spottingRequests);
 
-    return [{
-      id: 'demo-omar-request',
-      requesterId: 'member-omar',
-      requesterName: 'Omar',
-      branchId: CURRENT_BRANCH_ID,
-      exercise: 'Bench Press',
-      equipmentId: 'bench-03',
-      location: 'Bench 03 · Strength Floor',
-      weightKg: 80,
-      createdAt,
-      expiresAt: createdAt + REQUEST_DURATION,
-      status: 'pending',
-    }];
-  });
-
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,18 +43,11 @@ export function useSpottingRequests() {
 
       setNow(currentTime);
 
-      setRequests(previous =>
-        previous.map(request =>
-          request.status === 'pending' &&
-          request.expiresAt <= currentTime
-            ? { ...request, status: 'expired' }
-            : request
-        )
-      );
+      setRequests(previous => expireSpottingRequests(previous, currentTime));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [setRequests]);
 
   const myActiveRequest = requests.find(
     request =>
@@ -77,7 +61,7 @@ export function useSpottingRequests() {
   const availableRequests = requests.filter(
     request =>
       request.requesterId !== currentUserId &&
-      request.branchId === CURRENT_BRANCH_ID &&
+      canRequestSpot && request.branchId === branchId &&
       request.status === 'pending' &&
       request.expiresAt > now
   );
@@ -88,6 +72,7 @@ export function useSpottingRequests() {
     weightKg?: number,
     equipmentId?: string
   ): boolean {
+    if (!canRequestSpot || !branchId) return false;
     const alreadyActive = requests.some(
       request =>
         request.requesterId === currentUserId &&
@@ -104,8 +89,8 @@ export function useSpottingRequests() {
     const newRequest: SpottingRequest = {
       id: `${createdAt}-${Math.random()}`,
       requesterId: currentUserId,
-      requesterName: DEMO_MEMBERS[currentUserId],
-      branchId: CURRENT_BRANCH_ID,
+      requesterName: currentUserId === profile.id ? firstName(profile.fullName) : DEMO_MEMBERS[currentUserId],
+      branchId,
       exercise: exercise.trim(),
       equipmentId: equipmentId ?? location.trim(),
       location: location.trim(),
@@ -121,21 +106,22 @@ export function useSpottingRequests() {
   }
 
   function acceptRequest(id: string) {
+    if (!canRequestSpot) return;
     const currentTime = Date.now();
 
     setRequests(previous =>
       previous.map(request =>
         request.id === id &&
-        request.status === 'pending' &&
-        request.expiresAt > currentTime &&
-        request.branchId === CURRENT_BRANCH_ID &&
-        request.requesterId !== currentUserId
+          request.status === 'pending' &&
+          request.expiresAt > currentTime &&
+          request.branchId === branchId &&
+          request.requesterId !== currentUserId
           ? {
-              ...request,
-              status: 'accepted',
-              acceptedBy: currentUserId,
-              acceptedAt: currentTime,
-            }
+            ...request,
+            status: 'accepted',
+            acceptedBy: currentUserId,
+            acceptedAt: currentTime,
+          }
           : request
       )
     );
@@ -147,13 +133,13 @@ export function useSpottingRequests() {
     setRequests(previous =>
       previous.map(request =>
         request.id === id &&
-        request.status === 'accepted' &&
-        request.requesterId === currentUserId
+          request.status === 'accepted' &&
+          request.requesterId === currentUserId
           ? {
-              ...request,
-              status: 'completed',
-              completedAt: currentTime,
-            }
+            ...request,
+            status: 'completed',
+            completedAt: currentTime,
+          }
           : request
       )
     );
@@ -166,26 +152,29 @@ export function useSpottingRequests() {
     setRequests(previous =>
       previous.map(request =>
         request.id === id &&
-        (
-          request.status === 'pending' ||
-          request.status === 'accepted'
-        ) &&
-        (
-          request.requesterId === currentUserId ||
-          request.acceptedBy === currentUserId
-        )
+          (
+            request.status === 'pending' ||
+            request.status === 'accepted'
+          ) &&
+          (
+            request.requesterId === currentUserId ||
+            request.acceptedBy === currentUserId
+          )
           ? {
-              ...request,
-              status: 'cancelled',
-              cancelledBy: currentUserId,
-              cancellationReason: reason,
-            }
+            ...request,
+            status: 'cancelled',
+            cancelledBy: currentUserId,
+            cancellationReason: reason,
+          }
           : request
       )
     );
   }
 
   return {
+    canRequestSpot,
+    attendanceReady,
+    branchName,
     requests,
     now,
     currentUserId,

@@ -46,7 +46,12 @@ export function occupiedFor(e: Equipment, now: Date): string {
 }
 
 export function countByStatus(list: Equipment[]): Record<EquipmentStatus, number> {
-  const counts: Record<EquipmentStatus, number> = { Available: 0, Occupied: 0, AvailableSoon: 0, Maintenance: 0 };
+  const counts: Record<EquipmentStatus, number> = {
+    Available: 0,
+    Occupied: 0,
+    AvailableSoon: 0,
+    Maintenance: 0
+  };
   for (const e of list) counts[e.status] += 1;
   return counts;
 }
@@ -62,13 +67,26 @@ export function filterEquipment(list: Equipment[], status: StatusFilter, query: 
 
 // Admin override: the station is free again.
 export function resetToAvailable(e: Equipment): Equipment {
-  return { ...e, status: 'Available', occupiedBy: undefined, occupiedAt: undefined, estimatedFreeAt: undefined };
+  return {
+    ...e,
+    status: 'Available',
+    occupiedBy: undefined,
+    occupiedAt: undefined,
+    estimatedFreeAt: undefined
+  };
 }
 
 // Admin sets a status by hand. Only Occupied/Soon keep (or start) an occupied time.
 export function withStatus(e: Equipment, status: EquipmentStatus, now: Date): Equipment {
-  if (status === 'Available' || status === 'Maintenance') return { ...resetToAvailable(e), status };
-  return { ...e, status, occupiedAt: e.occupiedAt ?? now.toISOString() };
+  if (status === 'Available' || status === 'Maintenance') return {
+    ...resetToAvailable(e),
+    status
+  };
+  return {
+    ...e,
+    status,
+    occupiedAt: e.occupiedAt ?? now.toISOString()
+  };
 }
 
 // Zones every selected branch has, in the first branch's order — adding to several branches can

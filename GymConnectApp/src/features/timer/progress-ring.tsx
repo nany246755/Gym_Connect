@@ -17,9 +17,16 @@ export function ProgressRing({ size, strokeWidth, progress, color, trackColor, c
   const center = size / 2;
 
   return (
-    <View style={{ width: size, height: size }}>
+    <View style={{
+      width: size,
+      height: size
+    }}>
       {/* Rotated so the ring empties clockwise from 12 o'clock. */}
-      <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+      <Svg width={size} height={size} style={{
+        transform: [{
+          rotate: '-90deg'
+        }]
+      }}>
         <Circle cx={center} cy={center} r={radius} stroke={trackColor} strokeWidth={strokeWidth} fill="none" />
         <Circle
           cx={center}
@@ -39,5 +46,8 @@ export function ProgressRing({ size, strokeWidth, progress, color, trackColor, c
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', justifyContent: 'center' },
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
 });

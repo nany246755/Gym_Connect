@@ -7,14 +7,11 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react';
 
-import {
-  mockConversations,
-  mockMessages,
-} from './mockMessages';
+import { conversationStore, messageStore } from '@/services/messaging-service';
+import { useSessionStore } from '@/hooks/use-session-store';
 
 import type {
   ChatMessage,
@@ -81,7 +78,7 @@ interface MessagingProviderProps {
 // DEMO CONNECTIONS
 // ==========================================
 
-// For now, the signed-in member (member-aj) and Maya are connected.
+// For now, the signed-in member (user-andro) and Maya are connected.
 //
 // Later, we will replace this demo data with
 // the accepted connections from FR07.
@@ -125,11 +122,8 @@ export function MessagingProvider({
   connectedPairs = DEMO_CONNECTED_PAIRS,
 }: MessagingProviderProps) {
 
-  const [conversations, setConversations] =
-    useState<Conversation[]>(mockConversations);
-
-  const [messages, setMessages] =
-    useState<ChatMessage[]>(mockMessages);
+  const [conversations, setConversations] = useSessionStore(conversationStore);
+  const [messages, setMessages] = useSessionStore(messageStore);
 
   // ----------------------------------------
   // CHECK CONNECTION STATUS
@@ -233,7 +227,7 @@ export function MessagingProvider({
 
       return newConversation;
     },
-    [getConversation, isConnected]
+    [getConversation, isConnected, setConversations]
   );
 
   // ----------------------------------------
@@ -334,16 +328,16 @@ export function MessagingProvider({
         previous.map((item) =>
           item.id === input.conversationId
             ? {
-                ...item,
-                updatedAt: now,
-              }
+              ...item,
+              updatedAt: now,
+            }
             : item
         )
       );
 
       return true;
     },
-    [conversations, isConnected]
+    [conversations, isConnected, setMessages, setConversations]
   );
 
   // ----------------------------------------
@@ -387,7 +381,7 @@ export function MessagingProvider({
         })
       );
     },
-    [conversations]
+    [conversations, setMessages]
   );
 
   // ----------------------------------------

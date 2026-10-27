@@ -50,9 +50,9 @@ const TimerActionsContext = createContext<TimerActions | undefined>(undefined);
 const TimerSnapshotContext = createContext<TimerSnapshot | undefined>(undefined);
 
 const buzzLight = () =>
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
 const buzzDone = () =>
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => { });
 
 export function RestTimerProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<RestTimerState>(initialRestTimer);
@@ -87,7 +87,10 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
     loadRestTimer()
       .then((saved) => {
         if (!mounted) return;
-        const restored = saved ? { ...initialRestTimer, ...saved } : initialRestTimer;
+        const restored = saved ? {
+          ...initialRestTimer,
+          ...saved
+        } : initialRestTimer;
         const expired = restored.endsAt !== null && restored.endsAt <= Date.now();
         const next = expired ? finish(restored) : restored;
         stateRef.current = next;
@@ -100,12 +103,14 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         if (mounted) setReady(true);
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [queueSave]);
 
   const update = useCallback((change: TimerAction) => {
     if (!ready) return;
-    void commit(change).catch(() => {});
+    void commit(change).catch(() => { });
   }, [ready, commit]);
 
   const actions = useMemo<TimerActions>(() => ({
@@ -114,8 +119,14 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
     reset: () => update(reset),
     adjust: (deltaSec) => update((s) => adjust(s, deltaSec, Date.now())),
     selectPreset: (durationSec) => update((s) => selectPreset(s, durationSec)),
-    toggleVibrate: () => update((s) => ({ ...s, vibrate: !s.vibrate })),
-    resetSets: () => update((s) => ({ ...s, setNumber: 1 })),
+    toggleVibrate: () => update((s) => ({
+      ...s,
+      vibrate: !s.vibrate
+    })),
+    resetSets: () => update((s) => ({
+      ...s,
+      setNumber: 1
+    })),
     syncSession: async (sessionId) => {
       if (!ready) return;
       await commit((s) => syncCheckIn(s, sessionId));
@@ -141,7 +152,7 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
       if (remaining <= 0) {
         // Never generate a late vibration on returning from a long background gap.
         if (current.vibrate && now - current.endsAt <= 750) void buzzDone();
-        void commit(finish).catch(() => {});
+        void commit(finish).catch(() => { });
         return;
       }
       const secondsLeft = Math.ceil(remaining / 1000);
@@ -155,7 +166,11 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id);
   }, [ready, state.endsAt, commit]);
 
-  const snapshot = useMemo<TimerSnapshot>(() => ({ state, ready, error }), [state, ready, error]);
+  const snapshot = useMemo<TimerSnapshot>(() => ({
+    state,
+    ready,
+    error
+  }), [state, ready, error]);
   return (
     <TimerActionsContext.Provider value={actions}>
       <TimerSnapshotContext.Provider value={snapshot}>

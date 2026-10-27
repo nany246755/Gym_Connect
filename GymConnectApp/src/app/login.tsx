@@ -27,6 +27,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<'member' | 'admin'>('member');
 
   // Temporary navigation-only demo.
   // Firebase Authentication will replace this in Phase 2.
@@ -40,12 +41,14 @@ export default function LoginScreen() {
     }
 
     // This does NOT authenticate a real account.
-    router.replace('/member/Dashboard');
+    router.replace(role === 'admin' ? '/admin' : '/member/dashboard');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={{
+        headerShown: false
+      }} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -87,11 +90,42 @@ export default function LoginScreen() {
             </Text>
 
             <Text style={styles.subtitle}>
-              Sign in to continue your workout journey.
+              {role === 'admin'
+                ? 'Sign in to manage your gym.'
+                : 'Sign in to continue your workout journey.'}
             </Text>
           </View>
 
           <View style={styles.form}>
+            <Text style={styles.label}>Sign in as</Text>
+            <View style={styles.roleSelector}>
+              {(['member', 'admin'] as const).map((option) => (
+                <Pressable
+                  key={option}
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    selected: role === option
+                  }}
+                  onPress={() => setRole(option)}
+                  style={[
+                    styles.roleButton,
+                    role === option && styles.roleButtonSelected,
+                  ]}
+                >
+                  <Ionicons
+                    name={option === 'admin' ? 'shield-checkmark-outline' : 'person-outline'}
+                    size={20}
+                    color={role === option ? '#14213D' : '#CBD3E0'}
+                  />
+                  <Text style={[
+                    styles.roleButtonText,
+                    role === option && styles.roleButtonTextSelected,
+                  ]}>
+                    {option === 'admin' ? 'Admin' : 'Member'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
             <Text style={styles.label}>
               Email Address
             </Text>
@@ -165,7 +199,7 @@ export default function LoginScreen() {
               accessibilityRole="button"
             >
               <Text style={styles.loginButtonText}>
-                Sign In (Demo)
+                Sign In as {role === 'admin' ? 'Admin' : 'Member'} (Demo)
               </Text>
             </Pressable>
 
@@ -240,6 +274,39 @@ const styles = StyleSheet.create({
 
   form: {
     width: '100%',
+  },
+
+  roleSelector: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+
+  roleButton: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#8791A2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  roleButtonSelected: {
+    backgroundColor: '#F6AE2D',
+    borderColor: '#F6AE2D',
+  },
+
+  roleButtonText: {
+    color: '#CBD3E0',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  roleButtonTextSelected: {
+    color: '#14213D',
   },
 
   label: {
