@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -11,13 +11,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedSpottingRequests } from '../../../features/spotting/SpottingRequestsProvider';
-
-const C = {
-  midnight: '#14213D', marigold: '#FCA311', background: '#F4F6FA',
-  white: '#FFFFFF', muted: '#6B7890', border: '#E1E6EE',
-};
 
 const EXERCISES = [
   'Bench Press', 'Incline Bench Press', 'Squat', 'Deadlift', 'Shoulder Press',
@@ -28,6 +24,8 @@ const EQUIPMENT = [
 ];
 
 export default function CreateSpotRequestScreen() {
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { createRequest, myActiveRequest } = useSharedSpottingRequests();
   const [exercise, setExercise] = useState('');
   const [location, setLocation] = useState('');
@@ -90,7 +88,7 @@ export default function CreateSpotRequestScreen() {
           value={weight}
           onChangeText={setWeight}
           placeholder="e.g. 80 kg"
-          placeholderTextColor={C.muted}
+          placeholderTextColor={colors.textSecondary}
           keyboardType="decimal-pad"
           editable={!myActiveRequest}
         />
@@ -152,29 +150,29 @@ export default function CreateSpotRequestScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: C.background },
+const createStyles = (colors: ReturnType<typeof useTheme>) => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
   content: { padding: 22, paddingBottom: 50 },
   back: { alignSelf: 'flex-start', paddingVertical: 12, marginBottom: 15 },
-  backText: { color: C.midnight, fontWeight: '700', fontSize: 14 },
-  title: { color: C.midnight, fontSize: 29, fontWeight: '800', marginBottom: 12 },
-  description: { color: C.muted, fontSize: 14, lineHeight: 21, marginBottom: 20 },
-  label: { color: C.midnight, fontSize: 13, fontWeight: '700', marginTop: 13, marginBottom: 9 },
-  field: { minHeight: 54, backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 13, paddingHorizontal: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', color: C.midnight, fontSize: 15 },
-  fieldText: { color: C.midnight, fontSize: 14, flexShrink: 1 },
-  placeholder: { color: C.muted },
-  chevron: { color: C.muted, fontSize: 23 },
-  infoPanel: { backgroundColor: '#FFF2D9', borderRadius: 14, padding: 16, marginTop: 25, gap: 7 },
-  infoTitle: { color: C.midnight, fontSize: 14, fontWeight: '800' },
-  infoText: { color: C.muted, fontSize: 12, lineHeight: 18, marginBottom: 8 },
-  submit: { backgroundColor: C.marigold, paddingVertical: 17, borderRadius: 14, marginTop: 22, alignItems: 'center' },
-  submitText: { color: C.midnight, fontWeight: '800', fontSize: 15 },
+  backText: { color: colors.text, fontWeight: '700', fontSize: 14 },
+  title: { color: colors.text, fontSize: 29, fontWeight: '800', marginBottom: 12 },
+  description: { color: colors.textSecondary, fontSize: 14, lineHeight: 21, marginBottom: 20 },
+  label: { color: colors.text, fontSize: 13, fontWeight: '700', marginTop: 13, marginBottom: 9 },
+  field: { minHeight: 54, backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.border, borderRadius: 13, paddingHorizontal: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', color: colors.text, fontSize: 15 },
+  fieldText: { color: colors.text, fontSize: 14, flexShrink: 1 },
+  placeholder: { color: colors.textSecondary },
+  chevron: { color: colors.textSecondary, fontSize: 23 },
+  infoPanel: { backgroundColor: colors.accentSoft, borderRadius: 14, padding: 16, marginTop: 25, gap: 7 },
+  infoTitle: { color: colors.text, fontSize: 14, fontWeight: '800' },
+  infoText: { color: colors.textSecondary, fontSize: 12, lineHeight: 18, marginBottom: 8 },
+  submit: { backgroundColor: colors.primary, paddingVertical: 17, borderRadius: 14, marginTop: 22, alignItems: 'center' },
+  submitText: { color: colors.onPrimary, fontWeight: '800', fontSize: 15 },
   disabled: { opacity: 0.45 },
-  overlay: { flex: 1, backgroundColor: 'rgba(20,33,61,0.55)', justifyContent: 'center', padding: 22 },
-  modal: { backgroundColor: C.white, borderRadius: 20, padding: 18, gap: 9 },
-  modalTitle: { color: C.midnight, fontWeight: '800', fontSize: 18, marginBottom: 7 },
-  option: { backgroundColor: C.background, padding: 14, borderRadius: 11 },
-  optionText: { color: C.midnight, fontWeight: '600' },
+  overlay: { flex: 1, backgroundColor: colors.backdrop, justifyContent: 'center', padding: 22 },
+  modal: { backgroundColor: colors.backgroundElement, borderRadius: 20, padding: 18, gap: 9 },
+  modalTitle: { color: colors.text, fontWeight: '800', fontSize: 18, marginBottom: 7 },
+  option: { backgroundColor: colors.background, padding: 14, borderRadius: 11 },
+  optionText: { color: colors.text, fontWeight: '600' },
   close: { alignItems: 'center', paddingVertical: 12 },
-  closeText: { color: C.muted, fontWeight: '700' },
+  closeText: { color: colors.textSecondary, fontWeight: '700' },
 });

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams, type Href } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -10,14 +10,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@/hooks/use-theme';
 
 import { useSharedSpottingRequests } from '../../../features/spotting/SpottingRequestsProvider';
 import type { CancellationReason, SpottingRequest } from '../../../features/spotting/types';
-
-const C = {
-  midnight: '#14213D', marigold: '#FCA311', background: '#F4F6FA',
-  white: '#FFFFFF', muted: '#6B7890', border: '#E1E6EE', soft: '#FFF3D9',
-};
 
 const CANCEL_REASONS: CancellationReason[] = [
   'No longer need assistance', 'Spotter unavailable', 'Leaving the gym', 'Other',
@@ -30,6 +26,8 @@ function initials(name: string) {
 }
 
 export default function SpottingScreen() {
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { tab: requestedTab } = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<Tab>('active');
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -255,61 +253,61 @@ export default function SpottingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: C.background },
-  header: { backgroundColor: C.midnight, paddingHorizontal: 20, paddingVertical: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+const createStyles = (colors: ReturnType<typeof useTheme>) => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
+  header: { backgroundColor: colors.hero, paddingHorizontal: 20, paddingVertical: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logo: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.marigold, justifyContent: 'center', alignItems: 'center' },
-  logoText: { color: C.midnight, fontSize: 22, fontWeight: '800' },
-  brandText: { color: C.white, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
-  branch: { borderWidth: 1, borderColor: '#45516C', paddingHorizontal: 13, paddingVertical: 8, borderRadius: 20 },
-  branchText: { color: C.white, fontWeight: '700', fontSize: 12 },
+  logo: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.marigold, justifyContent: 'center', alignItems: 'center' },
+  logoText: { color: colors.onAccent, fontSize: 22, fontWeight: '800' },
+  brandText: { color: colors.heroText, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
+  branch: { borderWidth: 1, borderColor: colors.heroChip, paddingHorizontal: 13, paddingVertical: 8, borderRadius: 20 },
+  branchText: { color: colors.heroText, fontWeight: '700', fontSize: 12 },
   content: { padding: 18, paddingBottom: 46, gap: 12 },
-  eyebrow: { fontWeight: '800', fontSize: 10, letterSpacing: 1.4, color: '#A96900', marginTop: 8 },
-  title: { color: C.midnight, fontSize: 30, fontWeight: '800', marginBottom: 9 },
-  tabs: { backgroundColor: '#E9EDF4', borderRadius: 14, padding: 4, flexDirection: 'row', gap: 4 },
+  eyebrow: { fontWeight: '800', fontSize: 10, letterSpacing: 1.4, color: colors.accentText, marginTop: 8 },
+  title: { color: colors.text, fontSize: 30, fontWeight: '800', marginBottom: 9 },
+  tabs: { backgroundColor: colors.backgroundSelected, borderRadius: 14, padding: 4, flexDirection: 'row', gap: 4 },
   tab: { flex: 1, paddingVertical: 12, borderRadius: 11, alignItems: 'center' },
-  tabSelected: { backgroundColor: C.white },
-  tabText: { color: C.muted, fontSize: 14, fontWeight: '700' },
-  tabTextSelected: { color: C.midnight },
-  spotMe: { backgroundColor: C.marigold, paddingVertical: 15, alignItems: 'center', borderRadius: 14, marginTop: 3, marginBottom: 4 },
-  spotMeText: { color: C.midnight, fontSize: 16, fontWeight: '800' },
+  tabSelected: { backgroundColor: colors.backgroundElement },
+  tabText: { color: colors.textSecondary, fontSize: 14, fontWeight: '700' },
+  tabTextSelected: { color: colors.text },
+  spotMe: { backgroundColor: colors.primary, paddingVertical: 15, alignItems: 'center', borderRadius: 14, marginTop: 3, marginBottom: 4 },
+  spotMeText: { color: colors.onPrimary, fontSize: 16, fontWeight: '800' },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
-  sectionTitle: { color: C.midnight, fontSize: 18, fontWeight: '800', marginTop: 8 },
-  helper: { color: C.muted, fontSize: 12, marginTop: -7 },
-  card: { backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 20, padding: 17, gap: 9 },
+  sectionTitle: { color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 8 },
+  helper: { color: colors.textSecondary, fontSize: 12, marginTop: -7 },
+  card: { backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.border, borderRadius: 20, padding: 17, gap: 9 },
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.midnight, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: C.white, fontWeight: '800', fontSize: 14 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: colors.heroText, fontWeight: '800', fontSize: 14 },
   memberDetails: { flex: 1, gap: 4 },
-  memberName: { color: C.midnight, fontWeight: '800', fontSize: 16 },
-  muted: { color: C.muted, fontSize: 13 },
-  detail: { color: C.muted, fontSize: 13, lineHeight: 19 },
-  countdown: { color: '#A96900', fontSize: 13, fontWeight: '700', marginTop: 3 },
-  softButton: { backgroundColor: C.soft, alignItems: 'center', paddingVertical: 13, borderRadius: 12, marginTop: 4 },
-  softButtonText: { color: C.midnight, fontWeight: '800', fontSize: 14 },
-  darkButton: { backgroundColor: C.midnight, borderRadius: 12, alignItems: 'center', paddingVertical: 14, marginTop: 4 },
-  darkButtonText: { color: C.white, fontWeight: '800', fontSize: 14 },
-  outlineButton: { borderWidth: 1, borderColor: C.border, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 4 },
-  outlineText: { color: C.midnight, fontWeight: '700', fontSize: 14 },
-  cardTitle: { color: C.midnight, fontWeight: '800', fontSize: 17, flexShrink: 1 },
-  statusPill: { backgroundColor: '#E6F5EC', borderRadius: 12, paddingHorizontal: 11, paddingVertical: 7 },
-  statusText: { color: '#237747', fontWeight: '800', fontSize: 11 },
-  infoBox: { backgroundColor: C.soft, borderRadius: 12, padding: 14, gap: 5, marginTop: 5 },
-  infoTitle: { color: C.midnight, fontWeight: '800', fontSize: 15 },
-  empty: { backgroundColor: C.white, borderRadius: 20, borderWidth: 1, borderColor: C.border, padding: 27, alignItems: 'center', gap: 10 },
-  emptyTitle: { color: C.midnight, fontWeight: '800', fontSize: 16 },
-  previous: { color: C.muted, fontSize: 12, marginTop: 6, textTransform: 'capitalize' },
-  footerNote: { textAlign: 'center', color: C.muted, fontSize: 12 },
-  testPanel: { backgroundColor: '#E9EEF7', borderRadius: 15, padding: 12, marginTop: 12, gap: 9 },
-  testLabel: { color: C.muted, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
+  memberName: { color: colors.text, fontWeight: '800', fontSize: 16 },
+  muted: { color: colors.textSecondary, fontSize: 13 },
+  detail: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  countdown: { color: colors.accentText, fontSize: 13, fontWeight: '700', marginTop: 3 },
+  softButton: { backgroundColor: colors.accentSoft, alignItems: 'center', paddingVertical: 13, borderRadius: 12, marginTop: 4 },
+  softButtonText: { color: colors.text, fontWeight: '800', fontSize: 14 },
+  darkButton: { backgroundColor: colors.navy, borderRadius: 12, alignItems: 'center', paddingVertical: 14, marginTop: 4 },
+  darkButtonText: { color: colors.heroText, fontWeight: '800', fontSize: 14 },
+  outlineButton: { borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 4 },
+  outlineText: { color: colors.text, fontWeight: '700', fontSize: 14 },
+  cardTitle: { color: colors.text, fontWeight: '800', fontSize: 17, flexShrink: 1 },
+  statusPill: { backgroundColor: colors.successSoft, borderRadius: 12, paddingHorizontal: 11, paddingVertical: 7 },
+  statusText: { color: colors.success, fontWeight: '800', fontSize: 11 },
+  infoBox: { backgroundColor: colors.accentSoft, borderRadius: 12, padding: 14, gap: 5, marginTop: 5 },
+  infoTitle: { color: colors.text, fontWeight: '800', fontSize: 15 },
+  empty: { backgroundColor: colors.backgroundElement, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 27, alignItems: 'center', gap: 10 },
+  emptyTitle: { color: colors.text, fontWeight: '800', fontSize: 16 },
+  previous: { color: colors.textSecondary, fontSize: 12, marginTop: 6, textTransform: 'capitalize' },
+  footerNote: { textAlign: 'center', color: colors.textSecondary, fontSize: 12 },
+  testPanel: { backgroundColor: colors.backgroundSelected, borderRadius: 15, padding: 12, marginTop: 12, gap: 9 },
+  testLabel: { color: colors.textSecondary, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
   testRow: { flexDirection: 'row', gap: 8 },
-  testButton: { flex: 1, paddingVertical: 11, backgroundColor: '#AFBCD0', alignItems: 'center', borderRadius: 10 },
-  testSelected: { backgroundColor: C.midnight },
-  testText: { color: C.white, fontWeight: '800', fontSize: 13 },
-  testSelectedText: { color: C.white },
-  overlay: { flex: 1, backgroundColor: 'rgba(20,33,61,0.5)', alignItems: 'center', justifyContent: 'center', padding: 22 },
-  modal: { backgroundColor: C.white, width: '100%', borderRadius: 20, padding: 18, gap: 11 },
-  modalChoice: { backgroundColor: C.background, borderRadius: 11, padding: 15 },
-  modalChoiceText: { color: C.midnight, fontWeight: '600' },
+  testButton: { flex: 1, paddingVertical: 11, backgroundColor: colors.backgroundElement, alignItems: 'center', borderRadius: 10 },
+  testSelected: { backgroundColor: colors.navy },
+  testText: { color: colors.text, fontWeight: '800', fontSize: 13 },
+  testSelectedText: { color: colors.heroText },
+  overlay: { flex: 1, backgroundColor: colors.backdrop, alignItems: 'center', justifyContent: 'center', padding: 22 },
+  modal: { backgroundColor: colors.backgroundElement, width: '100%', borderRadius: 20, padding: 18, gap: 11 },
+  modalChoice: { backgroundColor: colors.background, borderRadius: 11, padding: 15 },
+  modalChoiceText: { color: colors.text, fontWeight: '600' },
 });
